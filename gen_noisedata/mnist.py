@@ -9,12 +9,13 @@ import argparse
 parser = argparse.ArgumentParser()
 
 
+
 parser.add_argument('--datapath', type=str, default='', help='input data path.')
 parser.add_argument('--savepath', type=str, default='', help='save data path.')
-parser.add_argument('--datatype', type=str, default='original', help='datatype include original or '
+parser.add_argument('--datatype', type=str, default='original', help='datatype to generate which includes original or '
                                                                      'RandomLabelNoise or SpecificLabelNoise'
                                                                      'RandomDataNoise or SpecificDataNoise '
-                                                                     'you shall load original data first.')
+                                                                     'you shall generate original data first.')
 
 
 args = parser.parse_args()
@@ -274,3 +275,8 @@ def load_alllabeldata(datapth, savepath, ratio):
     testdata = np.array(testdata, dtype=object)
     print("test data shape: ", testdata.shape)
     np.save(savepath + 'alllabeltestdata', testdata)
+
+
+if __name__ == "__main__":
+    if args.datatype == 'original':
+        load_orgdata(datapth=args.datapath,savepath=args.savepath)
