@@ -3,7 +3,21 @@ import random
 
 import cv2
 import numpy as np
+import argparse
 
+
+parser = argparse.ArgumentParser()
+
+
+parser.add_argument('--datapath', type=str, default='', help='input data path.')
+parser.add_argument('--savepath', type=str, default='', help='save data path.')
+parser.add_argument('--datatype', type=str, default='original', help='datatype include original or '
+                                                                     'RandomLabelNoise or SpecificLabelNoise'
+                                                                     'RandomDataNoise or SpecificDataNoise '
+                                                                     'you shall load original data first.')
+
+
+args = parser.parse_args()
 
 
 def load_orgdata(datapth, savepath):
