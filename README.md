@@ -1,7 +1,6 @@
 # DataDebugging
 ```mermaid
 graph LR
-A --> B;
-A --> C;
+gen_noisedata --> B;
 ```
 
