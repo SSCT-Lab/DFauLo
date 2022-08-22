@@ -5,19 +5,26 @@ import cv2
 import numpy as np
 import argparse
 
-
 parser = argparse.ArgumentParser()
 
+'''
+Read the following tips before running:
 
+1.Save the mnist data to a folder according to the label category first.
 
-parser.add_argument('--datapath', type=str, default='', help='input data path.')
-parser.add_argument('--savepath', type=str, default='', help='save data path.')
+2.When generate original data, using datapath=the folder generated above.
+
+3.When generate other type data, using original datapath.
+'''
+
+parser.add_argument('--datapath', type=str, default='./data/MNIST/MNIST_PNG/', help='input data path.')
+parser.add_argument('--savepath', type=str, default='./data/', help='save data path.')
 parser.add_argument('--datatype', type=str, default='original', help='datatype to generate which includes original or '
                                                                      'RandomLabelNoise or SpecificLabelNoise'
                                                                      'RandomDataNoise or SpecificDataNoise '
                                                                      'you shall generate original data first.')
-
-
+parser.add_argument('--noisedatapath', type=str, default='./data/CIFA10/CIFA10_PNG/train/', help='Noise data path.')
+parser.add_argument('--ratio', type=float, default=0.05, help='The proportion of noisy data.')
 args = parser.parse_args()
 
 
@@ -53,7 +60,7 @@ def load_alldirtydata(datapth, savepath, ratio):
         cnt = 0
         for imgname in os.listdir(datapth + 'train/' + str(label)):
             if cnt < trainNumAll[int(label)] * ratio:
-                newimg_path = "./data/CIFA10/CIFA10_PNG/train/"
+                newimg_path = args.noisedatapath
                 p = random.randint(0, 9)
                 newimg_path = newimg_path + str(p)
                 list = []
@@ -112,7 +119,7 @@ def load_randirtydata(datapth, savepath, ratio):
     for label in os.listdir(datapth + 'train'):
         for imgname in os.listdir(datapth + 'train/' + str(label)):
             if int(dirtylabel) == int(label) and cnt < trainNumAll[int(label)] * ratio:
-                newimg_path = "./data/CIFA10/CIFA10_PNG/train/"
+                newimg_path = args.noisedatapath
                 p = random.randint(0, 9)
                 newimg_path = newimg_path + str(p)
                 list = []
@@ -191,14 +198,14 @@ def load_ranlabeldata(datapth, savepath, ratio):
                 img = cv2.imread(imgpath)
                 img = np.array(img, dtype=np.float32)
                 traindata.append([label, img, 0])
-    print(cnt0,cnt1)
+    print(cnt0, cnt1)
     traindata = np.array(traindata, dtype=object)
     print("train data shape: ", traindata.shape)
     np.save(savepath + 'ranlabeltraindata', traindata)
 
     testdata = []
-    cnt0=0
-    cnt1=0
+    cnt0 = 0
+    cnt1 = 0
     for label in os.listdir(datapth + 'test'):
         for imgname in os.listdir(datapth + 'test/' + str(label)):
             if int(label) == swl[0] and cnt0 < testNumAll[int(label)] * ratio:
@@ -221,7 +228,7 @@ def load_ranlabeldata(datapth, savepath, ratio):
                 img = cv2.imread(imgpath)
                 img = np.array(img, dtype=np.float32)
                 testdata.append([label, img, 0])
-    print(cnt0,cnt1)
+    print(cnt0, cnt1)
     testdata = np.array(testdata, dtype=object)
     print("test data shape: ", testdata.shape)
     np.save(savepath + 'ranlabeltestdata', testdata)
@@ -279,4 +286,12 @@ def load_alllabeldata(datapth, savepath, ratio):
 
 if __name__ == "__main__":
     if args.datatype == 'original':
-        load_orgdata(datapth=args.datapath,savepath=args.savepath)
+        load_orgdata(datapth=args.datapath, savepath=args.savepath)
+    if args.datatype == 'RandomLabelNoise':
+        load_alllabeldata(datapth=args.datapath, savepath=args.savepath, ratio=args.ratio)
+    if args.datatype == 'SpecificLabelNoise':
+        load_ranlabeldata(datapth=args.datapath, savepath=args.savepath, ratio=args.ratio)
+    if args.datatype == 'RandomDataNoise':
+        load_alldirtydata(datapth=args.datapath, savepath=args.savepath, ratio=args.ratio)
+    if args.datatype == 'SpecificDataNoise':
+        load_randirtydata(datapth=args.datapath, savepath=args.savepath, ratio=args.ratio)
