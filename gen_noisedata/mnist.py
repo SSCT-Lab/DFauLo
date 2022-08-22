@@ -12,9 +12,8 @@ Read the following tips before running:
 
 1.Save the mnist data to a folder according to the label category first.
 
-2.When generate original data, using datapath=the folder generated above.
+2.When generate different type datas, using datapath=the folder generated above.
 
-3.When generate other type data, using original datapath.
 '''
 
 parser.add_argument('--datapath', type=str, default='./data/MNIST/MNIST_PNG/', help='input data path.')
@@ -87,7 +86,7 @@ def load_alldirtydata(datapth, savepath, ratio):
         cnt = 0
         for imgname in os.listdir(datapth + 'test/' + str(label)):
             if cnt < testNumAll[int(label)] * ratio:
-                newimg_path = "./data/CIFA10/CIFA10_PNG/train/"
+                newimg_path = args.noisedatapath
                 p = random.randint(0, 9)
                 newimg_path = newimg_path + str(p)
                 list = []
@@ -146,7 +145,7 @@ def load_randirtydata(datapth, savepath, ratio):
     for label in os.listdir(datapth + 'test'):
         for imgname in os.listdir(datapth + 'test/' + str(label)):
             if int(dirtylabel) == int(label) and cnt < testNumAll[int(label)] * ratio:
-                newimg_path = "./data/CIFA10/CIFA10_PNG/train/"
+                newimg_path = args.noisedatapath
                 p = random.randint(0, 9)
                 newimg_path = newimg_path + str(p)
                 list = []
