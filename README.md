@@ -1,7 +1,7 @@
 # DataDebugging
-### Program execution sequence
+### 0.Program execution sequence
 ```mermaid
 graph LR
-gen_noisedata --> B;
+gen_noisedata --> train;
 ```
 

@@ -16,7 +16,7 @@ Read the following tips before running:
 '''
 parser.add_argument('--datapath', type=str, default='./data/CIFA10/CIFA10_PNG/', help='input data path.')
 parser.add_argument('--savepath', type=str, default='./data/', help='save data path.')
-parser.add_argument('--datatype', type=str, default='RandomDataNoise', help='datatype to generate which includes original or '
+parser.add_argument('--datatype', type=str, default='original', help='datatype to generate which includes original or '
                                                                      'RandomLabelNoise or SpecificLabelNoise'
                                                                      'RandomDataNoise or SpecificDataNoise '
                                                                      'you shall generate original data first.')
