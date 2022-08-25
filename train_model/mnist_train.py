@@ -101,8 +101,6 @@ def train_data(model, lr, epoch, traindatapth, testdatapath, modelsave_path):
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
     model.to(device)
-    res1 = -1
-    res2 = -1
     for t in range(epoch):
         loss, current, n = 0.0, 0.0, 0
         model.train()
@@ -121,12 +119,8 @@ def train_data(model, lr, epoch, traindatapth, testdatapath, modelsave_path):
             n = n + 1
 
         a = val(test_loader, model, loss_fn)
-        if a > res1:
-            res1 = a
-            res2 = current / n
-            torch.save(model.state_dict(), modelsave_path)
-        print('now max train:' + ' ' + str(res2) + ' test: ' + str(res1))
-        print(f"epoch{t + 1} loss{a}\n-------------------")
+
+        print(f"epoch{t + 1} acc{a}\n-------------------")
         if t == epoch - 1:
             torch.save(model.state_dict(), modelsave_path)
             acc_in_orgtestset(model, loss_fn)
