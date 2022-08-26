@@ -37,18 +37,43 @@ MNIST
 Some `demo.py` results are shown below:
 
 
-![overview](./demodata/DFaLo_offline_result/0_label_9.png)(kave)
-
-<center>
-	<img src="./demodata/DFaLo_offline_result/0_label_9.png" width="30%" />
-	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-	<img src="./demodata/DFaLo_offline_result/0_label_9.png" width="30%" />
-	<br/>
-	<font color="AAAAAA">001.jpg</font>
-	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-	<font color="AAAAAA">002.jpg</font>
-</center>
-<br/>
+<div><table frame=void>	<!--用了<div>进行封装-->
+	<tr>
+        <td><div><center>	<!--每个格子内是图片加标题-->
+        	<img src="./demodata/DFaLo_offline_result/2_label_4"
+                 alt="Typora-Logo"
+                 height="120"/>	<!--高度设置-->
+        	<br>	<!--换行-->
+        	label: 4	<!--标题1-->
+        </center></div></td>    
+     	<td><div><center>	<!--第二张图片-->
+    		<img src="./demodata/DFaLo_offline_result/8_label_7"
+                 alt="Typora-Logo"
+                 height="120"/>	
+    		<br>
+    		label: 7
+        </center></div></td>
+        <td><div><center>	<!--每个格子内是图片加标题-->
+        	<img src="./demodata/DFaLo_offline_result/15_label_6"
+                 alt="Typora-Logo"
+                 height="120"/>	<!--高度设置-->
+        	<br>	<!--换行-->
+        	label: 6	<!--标题1-->
+        </center></div></td> 
+        <td><div><center>	<!--每个格子内是图片加标题-->
+        	<img src="./demodata/DFaLo_offline_result/21_label_7"
+                 alt="Typora-Logo"
+                 height="120"/>	<!--高度设置-->
+        	<br>	<!--换行-->
+        	label: 7	<!--标题1-->
+        </center></div></td> 
+        <td><div><center>	<!--每个格子内是图片加标题-->
+        	<img src="./demodata/DFaLo_offline_result/45_label_1"
+                 alt="Typora-Logo"
+                 height="120"/>	<!--高度设置-->
+        	<br>	<!--换行-->
+        	label: 1	<!--标题1-->
+        </center></div></td> 
+	</tr>
+</table></div>
 
