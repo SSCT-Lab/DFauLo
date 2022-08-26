@@ -46,6 +46,6 @@ def Outlier(datapath, savedatapath,ratio):
 
 if __name__ == "__main__":
 
-    datapath = './data/MNIST/MNIST_PNG/alllabeltraindata.npy'
+    datapath = './data/MNIST/MNIST_PNG/RandomLabelNoiseData.npy'
     savedatapath='./data/MNIST/MNIST_PNG/alllabeltraindata_Outlier.npy'
     Outlier(datapath=datapath,savedatapath=savedatapath,ratio=0.05)

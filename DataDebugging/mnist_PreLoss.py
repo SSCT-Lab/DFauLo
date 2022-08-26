@@ -46,7 +46,7 @@ def PreLoss(model, predatapath, ratio, newdatasavepath):
 
     np.save(newdatasavepath, newdata)
 if __name__ == "__main__":
-    datapath = './data/MNIST/MNIST_PNG/alllabeltraindata.npy'
+    datapath = './data/MNIST/MNIST_PNG/RandomLabelNoiseData.npy'
     modelpath = './models/mnist_alllabel_LeNet5.pth'
     savedatapath = './data/MNIST/MNIST_PNG/alllabeltraindata_PreLoss.npy'
 
