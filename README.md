@@ -1,5 +1,6 @@
 # DataDebugging
-## Program execution example
+![markdown picture](./pictures/overview.Png) 
+## One experimental procedure
 ```mermaid
 graph LR
 cifar10_gendata --> cifar10_train;
