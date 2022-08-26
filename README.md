@@ -19,6 +19,30 @@ cifar10_mutation --> cifar10_DFauLo;
 We prepare a demo for DFauLo:
 + `python demo.py`
 
-You should use **this link** to download our noisy data or raw data into the `demodata` folder.
+You should first prepare the **MNIST** dataset classified in the following format and save it in the demodata folder:
+
+```
+MNIST
+|-- train
+    |-- 0
+        |-- XX.png
+        |-- XX.png
+        |-- ...
+    |-- 1
+        |-- XX.png
+        |-- XX.png
+        |-- ...
+    |-- ...
+|-- test
+    |-- 0
+        |-- XX.png
+        |-- XX.png
+        |-- ...
+    |-- 1
+        |-- XX.png
+        |-- XX.png
+        |-- ...
+    |-- ...
+```
 
 
