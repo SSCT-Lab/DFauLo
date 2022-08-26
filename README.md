@@ -19,4 +19,6 @@ cifar10_mutation --> cifar10_DFauLo;
 We prepare a demo for DFauLo:
 + `python demo.py`
 
+You should use **this link** to download our noisy data or raw data into the `demodata` folder.
+
 
