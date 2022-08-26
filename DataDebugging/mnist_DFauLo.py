@@ -753,7 +753,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s -  %(message)s')
 logger = logging.getLogger(__name__)
 
 
-def Online_getAPFD_RAUC(fea):  # 极致优化
+def Online_getAPFD_RAUC(fea):  #优化
     rank = fea[:, -2].astype('int')
     NUM_DIRTY = rank.sum()
     NUM_ALL = rank.shape[0]

@@ -1,5 +1,5 @@
 # DataDebugging
-### 0.Program execution example
+## Program execution example
 ```mermaid
 graph LR
 cifar10_gendata --> cifar10_train;
@@ -11,4 +11,10 @@ cifar10_Activation --> cifar10_mutation;
 cifar10_PreLoss --> cifar10_mutation;
 cifar10_mutation --> cifar10_DFauLo;
 ```
+## Installation
+`pip install -r requirements.txt`
+
+## Usage
+We prepare a demo for DFauLo
+
 
