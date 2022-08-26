@@ -1,6 +1,6 @@
 # DataDebugging
 ![markdown picture](./pictures/overview.Png) 
-## One experimental procedure
+## Sequence of code execution in the repository
 ```mermaid
 graph LR
 cifar10_gendata --> cifar10_train;
@@ -16,6 +16,7 @@ cifar10_mutation --> cifar10_DFauLo;
 `pip install -r requirements.txt`
 
 ## Usage
-We prepare a demo for DFauLo
+We prepare a demo for DFauLo:
++ `python demo.py`
 
 
