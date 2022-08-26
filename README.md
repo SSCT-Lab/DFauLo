@@ -1,4 +1,5 @@
 # DataDebugging
+This repository is an implementation of the paper: **Data Fault Localization for Deep Learning Dataset**
 ![overview](./pictures/overview.Png) 
 ## Sequence of code execution in the repository
 ```mermaid
