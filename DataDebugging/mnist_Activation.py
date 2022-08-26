@@ -9,8 +9,9 @@ from torchvision import transforms
 
 from train_model.models import LeNet1, LeNet5
 
+device = 'cuda'
 
-device='cuda'
+
 def clusterLeNet1(datapath, savedatapath, model):
     model.to(device)
     dataprg = np.load(datapath, allow_pickle=True)
@@ -31,7 +32,6 @@ def clusterLeNet1(datapath, savedatapath, model):
         res = []
         with torch.no_grad():
             for i in range(x_train.shape[0]):
-
                 out = model.c1(x_train[i].reshape(1, 1, 28, 28).to(device))
                 out = model.TANH(out)
                 out = model.s2(out)
@@ -70,7 +70,6 @@ def clusterLeNet1(datapath, savedatapath, model):
         print(selnum)
     newdata = np.array(newdata, dtype=object)
     np.save(savedatapath, newdata)
-
 
 
 def clusterLeNet5(datapath, savedatapath, model):
@@ -133,16 +132,12 @@ def clusterLeNet5(datapath, savedatapath, model):
     np.save(savedatapath, newdata)
 
 
-
-
 if __name__ == "__main__":
     datapath = './data/MNIST/MNIST_PNG/alllabeltraindata.npy'
     modelpath = './models/mnist_alllabel_LeNet5.pth'
-
+    savedatapath = './data/MNIST/MNIST_PNG/alllabeltraindata_Activation.npy'
 
     model = LeNet5()
     state_dict = torch.load(modelpath)
     model.load_state_dict(state_dict)
-    clusterLeNet5(datapath, '',model)
-
-
+    clusterLeNet5(datapath, savedatapath, model)
