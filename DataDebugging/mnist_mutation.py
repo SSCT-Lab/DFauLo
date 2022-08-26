@@ -131,9 +131,9 @@ def mutate_LeNet5(datapath, premodelpath, newmodelsavepath, weighttype):
         if t == epoch - 1:
             torch.save(model.state_dict(), newmodelsavepath)
     print("DONE")
-    
+
 if __name__ == "__main__":
     datapath = './data/MNIST/MNIST_PNG/alllabeltraindata_Outlier.npy'
-    premodelpath = './models/mnist_alllabel_LeNet5.pth'
+    premodelpath = './models/mnist_RandomLabelNoise_LeNet5.pth'
     newmodelsavepath = './models/mnist_alllabel_LeNet5_Outlier.pth'
     mutate_LeNet5(datapath, premodelpath, newmodelsavepath, 'direct')

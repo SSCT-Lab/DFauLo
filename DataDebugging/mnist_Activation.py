@@ -134,7 +134,7 @@ def clusterLeNet5(datapath, savedatapath, model):
 
 if __name__ == "__main__":
     datapath = './data/MNIST/MNIST_PNG/RandomLabelNoiseData.npy'
-    modelpath = './models/mnist_alllabel_LeNet5.pth'
+    modelpath = './models/mnist_RandomLabelNoise_LeNet5.pth'
     savedatapath = './data/MNIST/MNIST_PNG/alllabeltraindata_Activation.npy'
 
     model = LeNet5()

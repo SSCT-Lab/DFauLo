@@ -1,5 +1,5 @@
 # DataDebugging
-![markdown picture](./pictures/overview.Png) 
+![overview](./pictures/overview.Png) 
 ## Sequence of code execution in the repository
 ```mermaid
 graph LR
@@ -34,5 +34,21 @@ MNIST
         |-- ...
     |-- ...
 ```
+Some `demo.py` results are shown below:
 
+
+![overview](./demodata/DFaLo_offline_result/0_label_9.png)(kave)
+
+<center>
+	<img src="./demodata/DFaLo_offline_result/0_label_9.png" width="30%" />
+	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+	<img src="./demodata/DFaLo_offline_result/0_label_9.png" width="30%" />
+	<br/>
+	<font color="AAAAAA">001.jpg</font>
+	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+	<font color="AAAAAA">002.jpg</font>
+</center>
+<br/>
 
