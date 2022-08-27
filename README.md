@@ -1,4 +1,4 @@
-# DataDebugging
+# DFauLo 
 This repository is an implementation of the paper: **Data Fault Localization for Deep Learning Dataset**
 
 ![overview](./pictures/overview.Png) 
