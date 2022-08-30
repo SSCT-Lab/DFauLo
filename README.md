@@ -79,7 +79,7 @@ Some `demo.py` results are shown below:
 	</tr>
 </table></div>
 
-**You can modify the code in the `demo.py` to run DFauLo on any dataset**
+**You can modify the code in the `demo.py` to run DFauLo on any dataset.**
 
 
 
