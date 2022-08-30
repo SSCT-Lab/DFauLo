@@ -17,8 +17,7 @@ cifar10_mutation --> cifar10_DFauLo;
 ## Installation
 `pip install -r requirements.txt`
 
-# Artifact
-## General usage
+## Usage
 We prepare a demo for DFauLo:
 + `python demo.py`
 
@@ -82,6 +81,7 @@ Some `demo.py` results are shown below:
 
 **You can modify the code in the `demo.py` to run DFauLo on any data set**
 
-## How to reproduce RQs
+
+
 
 
