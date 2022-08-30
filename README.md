@@ -2,18 +2,30 @@
 This repository is an implementation of the paper: **Data Fault Localization for Deep Learning Dataset**
 
 ![overview](./pictures/overview.Png) 
-## Sequence of code execution in the repository
-```mermaid
-graph LR
-cifar10_gendata --> cifar10_train;
-cifar10_train --> cifar10_Outlier;
-cifar10_train --> cifar10_Activation;
-cifar10_train --> cifar10_PreLoss;
-cifar10_Outlier --> cifar10_mutation;
-cifar10_Activation --> cifar10_mutation;
-cifar10_PreLoss --> cifar10_mutation;
-cifar10_mutation --> cifar10_DFauLo;
-```
+
+[comment]: <> (## Sequence of code execution in the repository)
+
+[comment]: <> (```mermaid)
+
+[comment]: <> (graph LR)
+
+[comment]: <> (cifar10_gendata --> cifar10_train;)
+
+[comment]: <> (cifar10_train --> cifar10_Outlier;)
+
+[comment]: <> (cifar10_train --> cifar10_Activation;)
+
+[comment]: <> (cifar10_train --> cifar10_PreLoss;)
+
+[comment]: <> (cifar10_Outlier --> cifar10_mutation;)
+
+[comment]: <> (cifar10_Activation --> cifar10_mutation;)
+
+[comment]: <> (cifar10_PreLoss --> cifar10_mutation;)
+
+[comment]: <> (cifar10_mutation --> cifar10_DFauLo;)
+
+[comment]: <> (```)
 ## Installation
 `pip install -r requirements.txt`
 
