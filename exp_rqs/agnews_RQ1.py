@@ -571,7 +571,7 @@ def writexcel(sheet, x, P, val, color, offset):
         y = P
     sheet.write(x, y + offset, val, style)
 
-def Online_getAPFD_RAUC(fea):  # 极致优化
+def Online_getAPFD_RAUC(fea):
     rank = fea[:, -2].astype('int')
     NUM_DIRTY = rank.sum()
     NUM_ALL = rank.shape[0]
