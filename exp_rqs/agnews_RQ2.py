@@ -1043,155 +1043,186 @@ def RQ2_2():
     workbook.save('C:/Users/WSHdeWindows/Desktop/res.xls')
 
 
-def RQ2_3():
-    dtlist = ['alllabel', 'ranlabel', 'alldirty', 'randirty']
+def RQ2(dataset, datatype, modeltype, Iteration_Batchsize, remove_ratio, Mutation_Operation, Mutation_Epoch):
+    feaVec = None
+    indic_fea = None
+    indic_gt = None
+    if Mutation_Operation == 'direct':
+        if remove_ratio == '005':
+            feaVec = np.load('F:/ICSEdata/RQ1usedata/' + dataset + 'feature/' + datatype + modeltype + '_feature.npy',
+                             allow_pickle=True)
+            new_feaVec = []
 
-    # args:
-    datasetname = 'AgNews'
-    mdlist = ['LSTM', 'BiLSTM']
-    ralist = ['003', '005', '010', '020']
+            for i in range(feaVec.shape[0]):
+                # new_fea_left = fea_left[:, 0:57],fea_left[:, 60],fea_left[:, 60]
+                new_feaVec.append(np.hstack((feaVec[i, 0:27], feaVec[i, 29], feaVec[i, 29])))
 
-    # res[datatype][dataratio][modeltype][args]
-    res = [[[[[] for g in range(6)] for k in range(len(mdlist))] for j in range(len(ralist))] for i in
-           range(len(dtlist))]
+            new_feaVec = np.array(new_feaVec, dtype=np.float32)
 
-    row = -1
-    workbook = xlwt.Workbook()  # 新建一个工作簿
-    sheet = workbook.add_sheet('1')  # 在工作簿中新建一个表格
-    # for i in range(PALL):
+            feaVec = new_feaVec
 
-    for DATATYPE in dtlist:
-        for dataratio in ralist:
-            for MODELTYPE in mdlist:
-                random.seed(6657)
-                for _ in range(PALL):
-                    print('now run:' + DATATYPE + ' ' + dataratio + ' ' + MODELTYPE + str(_ + 1) + '/' + str(PALL))
-                    t1, t2, t3, f, l, avg = PROCESS(modeltype=MODELTYPE, datatype=DATATYPE, ablation='all',
-                                                    dataratio=dataratio, pattern='AT')
-                    res[dtlist.index(DATATYPE)][ralist.index(dataratio)][mdlist.index(MODELTYPE)][0].append(t1)
-                    res[dtlist.index(DATATYPE)][ralist.index(dataratio)][mdlist.index(MODELTYPE)][1].append(t2)
-                    res[dtlist.index(DATATYPE)][ralist.index(dataratio)][mdlist.index(MODELTYPE)][2].append(t3)
-                    res[dtlist.index(DATATYPE)][ralist.index(dataratio)][mdlist.index(MODELTYPE)][3].append(f)
-                    res[dtlist.index(DATATYPE)][ralist.index(dataratio)][mdlist.index(MODELTYPE)][4].append(l)
-                    res[dtlist.index(DATATYPE)][ralist.index(dataratio)][mdlist.index(MODELTYPE)][5].append(avg)
+            indic_fea = -2
+            indic_gt = -1
 
-        for MODELTYPE in mdlist:
-            ORG = res[dtlist.index(DATATYPE)][ralist.index('005')][mdlist.index(MODELTYPE)]
-            file = open('save.txt', 'a')
-            s1 = format(sum(ORG[0]) / len(ORG[0]), '.4f')
-            s2 = format(sum(ORG[1]) / len(ORG[1]), '.4f')
-            s3 = format(sum(ORG[2]) / len(ORG[2]), '.4f')
-            file.write(MODELTYPE + ' ' + DATATYPE + ' ' + '005: ' + str(s1) + ' '
-                       + str(s2) + ' ' + str(s3) + '\n')
-            file.close()
-            writexcel(sheet, mdlist.index(MODELTYPE) * len(dtlist) + dtlist.index(DATATYPE), 1, s1, '', 0)
-            writexcel(sheet, mdlist.index(MODELTYPE) * len(dtlist) + dtlist.index(DATATYPE), 1, s2, '', 6)
-            writexcel(sheet, mdlist.index(MODELTYPE) * len(dtlist) + dtlist.index(DATATYPE), 1, s3, '', 12)
-            for dataratio in ralist:
-                if dataratio=='005':
-                    continue
-                SPC = res[dtlist.index(DATATYPE)][ralist.index(dataratio)][mdlist.index(MODELTYPE)]
-                PoBL_WTL = check(ORG[0], SPC[0])
-                APFD_WTL = check(ORG[1], SPC[1])
-                RAUC_WTL = check(ORG[2], SPC[2])
-                s1 = format(sum(SPC[0]) / len(SPC[0]), '.4f')
-                s2 = format(sum(SPC[1]) / len(SPC[1]), '.4f')
-                s3 = format(sum(SPC[2]) / len(SPC[2]), '.4f')
+        else:
+            feaVec = np.load(
+                'F:/ICSEdata/feature/' + remove_ratio + '_' + datatype + '_' + 'feature' + '_' + modeltype + '.npy',
+                allow_pickle=True)
+            indic_fea = -2
+            indic_gt = -1
 
-                file = open('save.txt', 'a')
-                file.write(MODELTYPE + ' ' + DATATYPE + ' ' + dataratio + ': '+str(s1) + ' '
-                           + str(s2) + ' ' + str(s3) + ' ' + PoBL_WTL + ' ' + APFD_WTL + ' ' + RAUC_WTL + '\n')
-                file.close()
-                writexcel(sheet, mdlist.index(MODELTYPE) * len(dtlist) + dtlist.index(DATATYPE),
-                          ralist.index(dataratio), s1, PoBL_WTL, 0)
-                writexcel(sheet, mdlist.index(MODELTYPE) * len(dtlist) + dtlist.index(DATATYPE),
-                          ralist.index(dataratio), s2, APFD_WTL, 6)
-                writexcel(sheet, mdlist.index(MODELTYPE) * len(dtlist) + dtlist.index(DATATYPE),
-                          ralist.index(dataratio), s3, RAUC_WTL, 12)
+    if Mutation_Operation == 'randomweight':
+        feaVec = np.load(
+            './data/AgNews/AgNews_LR_feature/' + 'randomweight_' + datatype + '_' + 'feature' + '_' + modeltype + '.npy',
+            allow_pickle=True)
+        indic_fea = -2
+        indic_gt = -1
 
-    workbook.save('F:/ICSEdata/excel/' + datasetname + '_RQ2_2.xls')
-    res = np.array(res)
-    np.save('F:/ICSEdata/RQdata/' + datasetname + '_RQ2_2.npy', res)
-    #     row += 1
-    #
-    #     save_RT = [0, 0, 0, 0, 0, 0]
-    #     save_DT = [0, 0, 0, 0, 0, 0]
-    #
-    #     PoBL_RT = []
-    #     APFD_RT = []
-    #     RAUC_RT = []
-    #
-    #     PoBL_DT = []
-    #     APFD_DT = []
-    #     RAUC_DT = []
-    #     random.seed(6657)
-    #     for _ in range(PALL):
-    #         print('now run:' + dataratio + ' ' + DATATYPE + ' ' + str(_) + '/' + str(PALL))
-    #         t1, t2, t3, f, l, avg = PROCESS(modeltype=MODELTYPE, datatype=DATATYPE, ablation='all',
-    #                                         dataratio=dataratio, pattern='AT')
-    #         PoBL_RT.append(t1)
-    #         APFD_RT.append(t2)
-    #         RAUC_RT.append(t3)
-    #         save_RT[0] += t1
-    #         save_RT[1] += t2
-    #         save_RT[2] += t3
-    #         save_RT[3] += f
-    #         save_RT[4] += l
-    #         save_RT[5] += avg
-    #     for i in range(6):
-    #         save_RT[i] = save_RT[i] / PALL
-    #
-    #     random.seed(6657)
-    #     for _ in range(PALL):
-    #         print('now run:' + 'direct' + ' ' + DATATYPE + ' ' + str(_) + '/' + str(PALL))
-    #         t1, t2, t3, f, l, avg = PROCESS(modeltype=MODELTYPE, datatype=DATATYPE, ablation='all',
-    #                                         dataratio='', pattern='AT')
-    #         PoBL_DT.append(t1)
-    #         APFD_DT.append(t2)
-    #         RAUC_DT.append(t3)
-    #         save_DT[0] += t1
-    #         save_DT[1] += t2
-    #         save_DT[2] += t3
-    #         save_DT[3] += f
-    #         save_DT[4] += l
-    #         save_DT[5] += avg
-    #     for i in range(6):
-    #         save_DT[i] = save_DT[i] / PALL
-    #
-    #     for i in range(6):
-    #         save_RT[i] = format(save_RT[i], '.4f')
-    #         save_DT[i] = format(save_DT[i], '.4f')
-    #
-    #     PoBL_WTL = check(PoBL_DT, PoBL_RT)
-    #     APFD_WTL = check(APFD_DT, APFD_RT)
-    #     RAUC_WTL = check(RAUC_DT, RAUC_RT)
-    #
-    #     file = open('save.txt', 'a')
-    #     s1 = MODELTYPE + ' ' + DATATYPE + ' ' + 'direct' + ': ' + str(save_DT[0]) + ' ' + str(save_DT[1]) + ' ' + str(
-    #         save_DT[2]) \
-    #          + ' ' + str(save_DT[3]) + ' ' + str(save_DT[4]) + ' ' + str(
-    #         save_DT[5]) + '\n'
-    #     s2 = MODELTYPE + ' ' + DATATYPE + ' ' + dataratio + ': ' + str(save_RT[0]) + ' ' + str(
-    #         save_RT[1]) + ' ' + str(
-    #         save_RT[2]) \
-    #          + ' ' + str(save_RT[3]) + ' ' + str(save_RT[4]) + ' ' + str(
-    #         save_RT[5]) + ' ' + PoBL_WTL + ' ' + APFD_WTL + ' ' + RAUC_WTL + '\n'
-    #     file.write(s1)
-    #     file.write(s2)
-    #     file.close()
-    #
-    #     # writexcel(sheet, row, 5, save_DT[0], '', 0)
-    #     # writexcel(sheet, row, 5, save_DT[1], '', 6)
-    #     # writexcel(sheet, row, 5, save_DT[2], '', 12)
-    #
-    #     writexcel(sheet, row, 0, save_RT[0], PoBL_WTL, 0)
-    #     writexcel(sheet, row, 0, save_RT[1], APFD_WTL, 6)
-    #     writexcel(sheet, row, 0, save_RT[2], RAUC_WTL, 12)
-    # workbook.save('C:/Users/WSHdeWindows/Desktop/res.xls')
+    print(feaVec.shape)
+
+    # xls save path
+    workbook_save_path = None
+    if datatype == 'alllabel':
+        workbook_save_path = 'G:/dfauloV2/RQ2/' + dataset + '/' + modeltype + '/' + Mutation_Epoch + '_' + Mutation_Operation + '_' + remove_ratio + '_' + str(
+            Iteration_Batchsize) + '_' + 'RandomLabelNoise' + modeltype + '.xls'
+    elif datatype == 'ranlabel':
+        workbook_save_path = 'G:/dfauloV2/RQ2/' + dataset + '/' + modeltype + '/' + Mutation_Epoch + '_' + Mutation_Operation + '_' + remove_ratio + '_' + str(
+            Iteration_Batchsize) + '_' + 'SpecificLabelNoise' + modeltype + '.xls'
+    elif datatype == 'alldirty':
+        workbook_save_path = 'G:/dfauloV2/RQ2/' + dataset + '/' + modeltype + '/' + Mutation_Epoch + '_' + Mutation_Operation + '_' + remove_ratio + '_' + str(
+            Iteration_Batchsize) + '_' + 'RandomDataNoise' + modeltype + '.xls'
+    elif datatype == 'randirty':
+        workbook_save_path = 'G:/dfauloV2/RQ2/' + dataset + '/' + modeltype + '/' + Mutation_Epoch + '_' + Mutation_Operation + '_' + remove_ratio + '_' + str(
+            Iteration_Batchsize) + '_' + 'SpecificDataNoise' + modeltype + '.xls'
+
+    green = "font:colour_index green;"
+    blue = "font:colour_index blue;"
+    black = "font:colour_index black;"
+    # Online
+    seedd = None
+    if Mutation_Epoch == '5':
+        seedd = 4354
+    elif Mutation_Epoch == '10':
+        seedd = 6657
+    elif Mutation_Epoch == '20':
+        seedd = 8563
+
+    random.seed(seedd)
+    workbook = xlwt.Workbook()
+    sheet = workbook.add_sheet('1')
+    sheet_2 = workbook.add_sheet('2')
+    result = {
+        'EXAM_F': [],
+        'EXAM_L': [],
+        'EXAM_AVG': [],
+        'POBL(1)': [],
+        'POBL(2)': [],
+        'POBL(5)': [],
+        'POBL(10)': [],
+        'APFD': [],
+        'RAUC': [],
+        'initilize': [],
+        'run_time': [],
+        'epochs': [],
+        'y': [],
+    }
+
+    sheet.write(0, 0, 'EXAM_F', xlwt.easyxf(blue))
+    sheet.write(0, 1, 'EXAM_L', xlwt.easyxf(blue))
+    sheet.write(0, 2, 'EXAM_AVG', xlwt.easyxf(blue))
+    sheet.write(0, 3, 'POBL(1)', xlwt.easyxf(blue))
+    sheet.write(0, 4, 'POBL(2)', xlwt.easyxf(blue))
+    sheet.write(0, 5, 'POBL(5)', xlwt.easyxf(blue))
+    sheet.write(0, 6, 'POBL(10)', xlwt.easyxf(blue))
+    sheet.write(0, 7, 'APFD', xlwt.easyxf(blue))
+    sheet.write(0, 8, 'RAUC', xlwt.easyxf(blue))
+    sheet.write(0, 9, 'initilize', xlwt.easyxf(blue))
+    sheet.write(0, 10, 'run_time', xlwt.easyxf(blue))
+    sheet.write(0, 11, 'epochs', xlwt.easyxf(blue))
+
+    for i in range(30):
+        print('Now is ' + datatype + modeltype + '  :' + str(i))
+
+        f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, y, yb, run_time, epochs, initilize = UPDATE(feaVec,
+                                                                                                        modeltype,
+                                                                                                        datatype,
+                                                                                                        indic_fea,
+                                                                                                        indic_gt,
+                                                                                                        Iteration_Batchsize)
+
+        # round(x,6)
+        f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, run_time = round(f, 6), round(l, 6), round(avg, 6), round(
+            pobl1, 6), round(pobl2, 6), round(pobl5, 6), round(save10, 6), round(apfd, 6), round(rauc, 6), round(
+            run_time, 6)
+
+        result['EXAM_F'].append(f)
+        result['EXAM_L'].append(l)
+        result['EXAM_AVG'].append(avg)
+        result['POBL(1)'].append(pobl1)
+        result['POBL(2)'].append(pobl2)
+        result['POBL(5)'].append(pobl5)
+        result['POBL(10)'].append(save10)
+        result['APFD'].append(apfd)
+        result['RAUC'].append(rauc)
+        result['initilize'].append(initilize)
+        result['run_time'].append(run_time)
+        result['epochs'].append(epochs)
+        result['y'].append(y)
+
+        sheet.write(i + 1, 0, f, xlwt.easyxf(black))
+        sheet.write(i + 1, 1, l, xlwt.easyxf(black))
+        sheet.write(i + 1, 2, avg, xlwt.easyxf(black))
+        sheet.write(i + 1, 3, pobl1, xlwt.easyxf(black))
+        sheet.write(i + 1, 4, pobl2, xlwt.easyxf(black))
+        sheet.write(i + 1, 5, pobl5, xlwt.easyxf(black))
+        sheet.write(i + 1, 6, save10, xlwt.easyxf(black))
+        sheet.write(i + 1, 7, apfd, xlwt.easyxf(black))
+        sheet.write(i + 1, 8, rauc, xlwt.easyxf(black))
+        sheet.write(i + 1, 9, initilize, xlwt.easyxf(black))
+        sheet.write(i + 1, 10, run_time, xlwt.easyxf(black))
+        sheet.write(i + 1, 11, epochs, xlwt.easyxf(black))
+
+        if i == 0:
+            for j in range(len(y)):
+                sheet_2.write(i, j, round(yb[j], 6), xlwt.easyxf(blue))
+
+        for j in range(len(y)):
+            sheet_2.write(i + 1, j, round(y[j], 6), xlwt.easyxf(black))
+
+        workbook.save(workbook_save_path)
+
+    # compute the mean and std of the result
+    for i, key in enumerate(result.keys()):
+        if key == 'y':
+            # col mean
+            col_mean = np.mean(result[key], axis=0)
+            col_std = np.std(result[key], axis=0)
+            for j in range(len(col_mean)):
+                sheet_2.write(31, j, round(col_mean[j], 6), xlwt.easyxf(green))
+                sheet_2.write(32, j, round(col_std[j], 6), xlwt.easyxf(green))
+
+        else:
+            sheet.write(31, i, round(float(np.mean(result[key])), 6), xlwt.easyxf(green))
+            sheet.write(32, i, round(float(np.std(result[key])), 6), xlwt.easyxf(green))
+
+    workbook.save(workbook_save_path)
 
 
 if __name__ == "__main__":
-    RQ2_1()
+    config = [
+        ['10', 'direct', '005', 200],
+        ['5', 'direct', '005', 200],
+        ['20', 'direct', '005', 200],
+        ['10', 'randomweight', '005', 200],
+        ['10', 'direct', '003', 200],
+        ['10', 'direct', '010', 200],
+        ['10', 'direct', '005', 100],
+        ['10', 'direct', '005', 500]]
+
+    for conf in config:
+        RQ2(dataset='AgNews', datatype='randirty', modeltype='BiLSTM', Iteration_Batchsize=conf[3],
+                     remove_ratio=conf[2],
+                     Mutation_Operation=conf[1], Mutation_Epoch=conf[0])
     # S3model = BiLSTM(voc_len=len(vocab), PAD=vocab.PAD)
     # S3state_dict = torch.load('./retrainmodel/agnews_alllabel_BiLSTM_retrain_LOSS.pth')
     # S3model.load_state_dict(S3state_dict)

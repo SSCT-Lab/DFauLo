@@ -827,124 +827,112 @@ def DeepState(feaVec,modeltype,datatype):
     # print(s / 120000)
 
 
-def RQ1(modeltype, datatype, excelx, sheet):
-    plt.figure()
-    Coordinatedata = []  # X,theory,offline,online
-
-    # OffLine
-    bestt1 = 0
-    bestt2 = 0
-    bestf = 0
-    bestl = 0
-    bestavg = 0
-    bestscore = 0
-    besty = 0
-    theory = 0
-    savedata = 0
-    random.seed(6657)
+def RQ1(dataset, datatype, modeltype, methodology):
     feaVec = np.load('F:/ICSEdata/RQ1usedata/AgNewsfeature/' + datatype + modeltype + '_feature.npy',
                      allow_pickle=True)  # LeNet5
-    for _ in range(10):
-        print(_)
-        t1, t2, t3, f, l, avg, y, yb, data = AT(feaVec, modeltype, datatype)
-        if t3 > bestscore:
-            bestt1 = t1
-            bestt2 = t2
-            bestf = f
-            bestl = l
-            bestavg = avg
-            bestscore = t3
-            besty = y
-            theory = yb
-            savedata = data
-    writexcel(sheet, excelx, 0, bestf, '', 0)
-    writexcel(sheet, excelx, 0, bestl, '', 6)
-    writexcel(sheet, excelx, 0, bestavg, '', 12)
-    writexcel(sheet, excelx + 29, 0, bestt1, '', 0)
-    writexcel(sheet, excelx + 29, 0, bestt2, '', 6)
-    writexcel(sheet, excelx + 29, 0, bestscore, '', 12)
-    np.save('F:/ICSEdata/RQ1data/AgNews/' + datatype + modeltype + '_offline.npy', savedata)
-    X = [x for x in range(101)]
-    plt.plot(X, theory, color='blue', label='Theory Best')
-    plt.plot(X, besty, color='pink', label='Offline')
-    Coordinatedata.append(X)
-    Coordinatedata.append(theory)
-    Coordinatedata.append(besty)
-
-    # Online
-    random.seed(6657)
-    t1, t2, t3, f, l, avg, y, yb, onlinedata = UPDATE(feaVec, modeltype, datatype)
-    writexcel(sheet, excelx, 1, f, '', 0)
-    writexcel(sheet, excelx, 1, l, '', 6)
-    writexcel(sheet, excelx, 1, avg, '', 12)
-    writexcel(sheet, excelx + 29, 1, t1, '', 0)
-    writexcel(sheet, excelx + 29, 1, t2, '', 6)
-    writexcel(sheet, excelx + 29, 1, t3, '', 12)
-    plt.plot(X, y, color='red', label='Online')
-    np.save('F:/ICSEdata/RQ1data/AgNews/' + datatype + modeltype + '_online.npy', onlinedata)
-    Coordinatedata.append(y)
-
-    # Random
-    y = [x for x in range(101)]
-    plt.plot(X, y, color='black', label='Random')
-
-    # DeepGini
-    t1, t2, t3, f, l, avg, y, yb, ginidata = DeepGini(feaVec, 4)
-    np.save('F:/ICSEdata/RQ1data/AgNews/' + datatype + modeltype + '_gini.npy', ginidata)
-    writexcel(sheet, excelx, 2, f, '', 0)
-    writexcel(sheet, excelx, 2, l, '', 6)
-    writexcel(sheet, excelx, 2, avg, '', 12)
-    writexcel(sheet, excelx + 29, 2, t1, '', 0)
-    writexcel(sheet, excelx + 29, 2, t2, '', 6)
-    writexcel(sheet, excelx + 29, 2, t3, '', 12)
-    Coordinatedata.append(y)
-    plt.plot(X, y, linestyle='--', color='#8A2BE2', label='DeepGini')
-
-
-    #DeepState
-    t1, t2, t3, f, l, avg, y, yb, statedata = DeepState(feaVec, modeltype,datatype)
-    np.save('F:/ICSEdata/RQ1data/AgNews/' + datatype + modeltype + '_state.npy', ginidata)
-    writexcel(sheet, excelx, 3, f, '', 0)
-    writexcel(sheet, excelx, 3, l, '', 6)
-    writexcel(sheet, excelx, 3, avg, '', 12)
-    writexcel(sheet, excelx + 29, 3, t1, '', 0)
-    writexcel(sheet, excelx + 29, 3, t2, '', 6)
-    writexcel(sheet, excelx + 29, 3, t3, '', 12)
-    Coordinatedata.append(y)
-    plt.plot(X, y, linestyle='--', color='#A52A2A', label='DeepState')
-
-
-
-    # cleanlab
-    random.seed(6657)
-    t1, t2, t3, f, l, avg, y, yb = CleanLab(datatype,modeltype)
-    # np.save('F:/ICSEdata/RQ1data/AgNews/' + datatype + modeltype + '_cleanlab.npy', ginidata)
-    writexcel(sheet, excelx, 5, f, '', 0)
-    writexcel(sheet, excelx, 5, l, '', 6)
-    writexcel(sheet, excelx, 5, avg, '', 12)
-    writexcel(sheet, excelx + 29, 5, t1, '', 0)
-    writexcel(sheet, excelx + 29, 5, t2, '', 6)
-    writexcel(sheet, excelx + 29, 5, t3, '', 12)
-    Coordinatedata.append(y)
-    plt.plot(X, y, linestyle='--', color='Aqua', label='CleanLab')
-
-
-
-    Coordinatedata = np.array(Coordinatedata)
-    np.save('F:/ICSEdata/RQ1data/AgNews/' + datatype + modeltype + '_Coordinatedata.npy', Coordinatedata)
-
-    plt.xlabel(r'$Percentage\ of\ test\ case\ executed$')
-    plt.ylabel(r'$Percentage\ of\ fault\ detected$')
-    plt.legend()
+    # xls save path
+    workbook_save_path = None
     if datatype == 'alllabel':
-        plt.savefig('F:/ICSEdata/RQ1picture/AgNews/' + 'RandomLabelNoise_' + modeltype + '.jpg', dpi=1200)  # 指定分辨率保存
+        workbook_save_path = 'G:/dfauloV2/RQ1/' + methodology + '/' + dataset + '/RandomLabelNoise' + modeltype + '.xls'
     elif datatype == 'ranlabel':
-        plt.savefig('F:/ICSEdata/RQ1picture/AgNews/' + 'SepcificLabelNoise_' + modeltype + '.jpg', dpi=1200)  # 指定分辨率保存
+        workbook_save_path = 'G:/dfauloV2/RQ1/' + methodology + '/' + dataset + '/SpecificLabelNoise' + modeltype + '.xls'
     elif datatype == 'alldirty':
-        plt.savefig('F:/ICSEdata/RQ1picture/AgNews/' + 'RandomDataNoise_' + modeltype + '.jpg', dpi=1200)  # 指定分辨率保存
+        workbook_save_path = 'G:/dfauloV2/RQ1/' + methodology + '/' + dataset + '/RandomDataNoise' + modeltype + '.xls'
     elif datatype == 'randirty':
-        plt.savefig('F:/ICSEdata/RQ1picture/AgNews/' + 'SpecificDataNoise_' + modeltype + '.jpg', dpi=1200)  # 指定分辨率保存
-    return sheet
+        workbook_save_path = 'G:/dfauloV2/RQ1/' + methodology + '/' + dataset + '/SpecificDataNoise' + modeltype + '.xls'
+    green = "font:colour_index green;"
+    blue = "font:colour_index blue;"
+    black = "font:colour_index black;"
+    # Online
+    # random.seed(6657)
+    workbook = xlwt.Workbook()
+    sheet = workbook.add_sheet('1')
+    sheet_2 = workbook.add_sheet('2')
+    result = {
+        'EXAM_F': [],
+        'EXAM_L': [],
+        'EXAM_AVG': [],
+        'POBL(1)': [],
+        'POBL(2)': [],
+        'POBL(5)': [],
+        'POBL(10)': [],
+        'APFD': [],
+        'RAUC': [],
+        'run_time': [],
+        'y': [],
+    }
+
+    sheet.write(0, 0, 'EXAM_F', xlwt.easyxf(blue))
+    sheet.write(0, 1, 'EXAM_L', xlwt.easyxf(blue))
+    sheet.write(0, 2, 'EXAM_AVG', xlwt.easyxf(blue))
+    sheet.write(0, 3, 'POBL(1)', xlwt.easyxf(blue))
+    sheet.write(0, 4, 'POBL(2)', xlwt.easyxf(blue))
+    sheet.write(0, 5, 'POBL(5)', xlwt.easyxf(blue))
+    sheet.write(0, 6, 'POBL(10)', xlwt.easyxf(blue))
+    sheet.write(0, 7, 'APFD', xlwt.easyxf(blue))
+    sheet.write(0, 8, 'RAUC', xlwt.easyxf(blue))
+    sheet.write(0, 9, 'run_time', xlwt.easyxf(blue))
+
+    for i in range(3):
+        print('Now is ' + datatype + modeltype + '  :' + str(i))
+        if methodology == 'ours':
+            f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, y, yb, run_time = UPDATE(feaVec, modeltype, datatype)
+        elif methodology == 'deepgini':
+            f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, y, yb, run_time = DeepGini(feaVec, 4)
+        elif methodology == 'deepstate':
+            f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, y, yb, run_time = DeepState(feaVec, modeltype, datatype)
+        elif methodology == 'cleanlab':
+            f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, y, yb, run_time = CleanLab(feaVec, 4)
+        f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, run_time = round(f, 6), round(l, 6), round(avg, 6), round(
+            pobl1, 6), round(pobl2, 6), round(pobl5, 6), round(save10, 6), round(apfd, 6), round(rauc, 6), round(
+            run_time, 6)
+
+        result['EXAM_F'].append(f)
+        result['EXAM_L'].append(l)
+        result['EXAM_AVG'].append(avg)
+        result['POBL(1)'].append(pobl1)
+        result['POBL(2)'].append(pobl2)
+        result['POBL(5)'].append(pobl5)
+        result['POBL(10)'].append(save10)
+        result['APFD'].append(apfd)
+        result['RAUC'].append(rauc)
+        result['run_time'].append(run_time)
+        result['y'].append(y)
+        sheet.write(i + 1, 0, f, xlwt.easyxf(black))
+        sheet.write(i + 1, 1, l, xlwt.easyxf(black))
+        sheet.write(i + 1, 2, avg, xlwt.easyxf(black))
+        sheet.write(i + 1, 3, pobl1, xlwt.easyxf(black))
+        sheet.write(i + 1, 4, pobl2, xlwt.easyxf(black))
+        sheet.write(i + 1, 5, pobl5, xlwt.easyxf(black))
+        sheet.write(i + 1, 6, save10, xlwt.easyxf(black))
+        sheet.write(i + 1, 7, apfd, xlwt.easyxf(black))
+        sheet.write(i + 1, 8, rauc, xlwt.easyxf(black))
+        sheet.write(i + 1, 9, run_time, xlwt.easyxf(black))
+
+        if i == 0:
+            for j in range(len(y)):
+                sheet_2.write(i, j, round(yb[j], 6), xlwt.easyxf(blue))
+
+        for j in range(len(y)):
+            sheet_2.write(i + 1, j, round(y[j], 6), xlwt.easyxf(black))
+
+        workbook.save(workbook_save_path)
+
+    # compute the mean and std of the result
+    for i, key in enumerate(result.keys()):
+        if key == 'y':
+            # col mean
+            col_mean = np.mean(result[key], axis=0)
+            col_std = np.std(result[key], axis=0)
+            for j in range(len(col_mean)):
+                sheet_2.write(21, j, round(col_mean[j], 6), xlwt.easyxf(green))
+                sheet_2.write(22, j, round(col_std[j], 6), xlwt.easyxf(green))
+
+        else:
+            sheet.write(21, i, round(float(np.mean(result[key])), 6), xlwt.easyxf(green))
+            sheet.write(22, i, round(float(np.std(result[key])), 6), xlwt.easyxf(green))
+
+    workbook.save(workbook_save_path)
 
 def NEW_ONLINE(datatype, modeltype, excelx, sheet):
     feaVec = np.load('F:/ICSEdata/RQ1usedata/AgNewsfeature/' + datatype + modeltype + '_feature.npy',
@@ -963,13 +951,14 @@ import warnings
 warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
-    feaVec = np.load('F:/ICSEdata/RQ1usedata/AgNewsfeature/alllabelBiLSTM_feature.npy',
-                     allow_pickle=True)
-    start=time.time()
-    DeepState(feaVec,'BiLSTM','alllabel')
-    end=time.time()
-    print('执行时间:',end-start)
-    # FeatureExtraction('BiLSTM', 'alllabel')
+    dtlist = ['alllabel', 'ranlabel', 'alldirty', 'randirty']
+    mdlist = ['BiLSTM']
+
+    for dt in dtlist:
+        for md in mdlist:
+            RQ1(dataset='AgNews', datatype=dt, modeltype=md, methodology='cleanlab')
+
+# FeatureExtraction('BiLSTM', 'alllabel')
     # dtlist = ['alllabel', 'ranlabel', 'alldirty', 'randirty']
     # mdlist = ['LSTM', 'BiLSTM']
     # workbook = xlwt.Workbook()  # 新建一个工作簿

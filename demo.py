@@ -284,7 +284,7 @@ def getrandomdata(lb, Outlier_model, Activation_model, PreLoss_model, org_model)
     return fea
 
 
-def Offline(feaVec, Outlier_model, Activation_model, PreLoss_model, org_model):
+def Susp_initialization(feaVec, Outlier_model, Activation_model, PreLoss_model, org_model):
     logger.info('start Offline')
     isdt = np.array([int(x) for x in feaVec[:, -1]])
     feaVecsimple = feaVec[:, 0:-3]
@@ -340,12 +340,8 @@ def visualization(offline_data):
                  str(i) + '_label_' + str(offline_data[i][0]) + '.png')
 
 
-def Online(fea_labeled, label, fea_left):
-    '''
-    it is a man-machine collaboration function.
+def DfauLo(fea_labeled, label, fea_left):
 
-    You can find out how to do it in our paper.
-    '''
     lg = LogisticRegression(C=1.0)
     lg.fit(fea_labeled, label)
 
@@ -354,7 +350,7 @@ def Online(fea_labeled, label, fea_left):
 
     fea_left = fea_left[LRres.argsort()[::-1]]
 
-    np.save('', fea_left)
+    return fea_left
 
 
 if __name__ == "__main__":
@@ -432,13 +428,31 @@ if __name__ == "__main__":
         Feature.append(fea)
     Feature = np.array(Feature, dtype=object)
 
-    offline_fea, offline_data = Offline(feaVec=Feature,
+    Si_fea, Si_data = Susp_initialization(feaVec=Feature,
                                         Outlier_model=Outlier_model,
                                         Activation_model=Activation_model,
                                         PreLoss_model=PreLoss_model,
                                         org_model=model)
 
-    np.save('./demodata/offline_data.npy', offline_data)
+    np.save('./demodata/Si_data.npy', Si_data)
 
-    # offline_data = np.load('./demodata/offline_data.npy', allow_pickle=True)
-    visualization(offline_data)
+    # Si_data = np.load('./demodata/Si_data.npy', allow_pickle=True)
+    visualization(Si_data)
+
+    '''
+    DfauLo part need, human labeling
+    '''
+    for round in range(10):
+
+        '''
+        label the first n data to obtain the labeled data corresponding feature(fea_labeled), 
+        corresponding labels(label) and remaining data corresponding feature(fea_left)
+        '''
+
+        fea_labeled = np.load('./demodata/fea_labeled'+str(round)+'.npy', allow_pickle=True)
+        label = np.load('./demodata/label'+str(round)+'.npy', allow_pickle=True)
+        fea_left = np.load('./demodata/fea_left'+str(round)+'.npy', allow_pickle=True)
+
+        DfauLo(fea_labeled, label, fea_left)
+
+

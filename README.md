@@ -48,8 +48,9 @@ MNIST
         |-- ...
     |-- ...
 ```
-Some `demo.py` results are shown below:
+Some `demo.py` results are shown below (This is the sorting result based on the Susp initialization model):
 
+You can add human labeling to make the results better, according to the paper.
 
 <div><table frame=void>	<!--用了<div>进行封装-->
 	<tr>

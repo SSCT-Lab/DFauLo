@@ -818,105 +818,110 @@ def Uncertainty(feaVec, datatype):
     # return save1, save2, save3, f, l, avg, y, yb, newdata, newbb
 
 
-def RQ1(datatype, excelx, sheet):
-    plt.figure()
-    Coordinatedata = []  # X,theory,offline,online
-
-    # OffLine
-    bestt1 = 0
-    bestt2 = 0
-    bestf = 0
-    bestl = 0
-    bestavg = 0
-    bestscore = 0
-    besty = 0
-    theory = 0
-    savedata = 0
-    random.seed(6657)
-    savebb = 0
+def RQ1(dataset, datatype, modeltype, methodology):
     feaVec = np.load('../MTFL/features/' + datatype + '_feature_newclus.npy',
                      allow_pickle=True)
-    for _ in range(10):
-        print(_)
-        t1, t2, t3, f, l, avg, y, yb, data, newbb, _ = AT(feaVec, datatype)
-        if t3 > bestscore:
-            bestt1 = t1
-            bestt2 = t2
-            bestf = f
-            bestl = l
-            bestavg = avg
-            bestscore = t3
-            besty = y
-            theory = yb
-            savedata = data
-            savebb = newbb
-    writexcel(sheet, excelx, 0, bestf, '', 0)
-    writexcel(sheet, excelx, 0, bestl, '', 6)
-    writexcel(sheet, excelx, 0, bestavg, '', 12)
-    writexcel(sheet, excelx + 29, 0, bestt1, '', 0)
-    writexcel(sheet, excelx + 29, 0, bestt2, '', 6)
-    writexcel(sheet, excelx + 29, 0, bestscore, '', 12)
-    np.save('F:/ICSEdata/RQ1data/MTFL/' + datatype + '_offline_newclus.npy', savedata)
-    np.save('F:/ICSEdata/RQ1data/MTFL/' + datatype + '_bb_offline_newclus.npy', savebb)
-    X = [x for x in range(101)]
-    plt.plot(X, theory, color='blue', label='Theory Best')
-    plt.plot(X, besty, color='pink', label='Offline')
-    Coordinatedata.append(X)
-    Coordinatedata.append(theory)
-    Coordinatedata.append(besty)
+    # xls save path
+    workbook_save_path = None
+    if datatype == 'D1':
+        workbook_save_path = 'G:/dfauloV2/' + methodology + '/' + dataset + '/LabelNoise' + modeltype + '.xls'
+    elif datatype == 'D2':
+        workbook_save_path = 'G:/dfauloV2/' + methodology + '/' + dataset + '/DataNoise' + modeltype + '.xls'
 
-    feaVec = np.load('../MTFL/features/' + datatype + '_feature_newclus.npy',
-                     allow_pickle=True)
+    green = "font:colour_index green;"
+    blue = "font:colour_index blue;"
+    black = "font:colour_index black;"
     # Online
     random.seed(6657)
-    t1, t2, t3, f, l, avg, y = UPDATE(feaVec, datatype)
-    writexcel(sheet, excelx, 1, f, '', 0)
-    writexcel(sheet, excelx, 1, l, '', 6)
-    writexcel(sheet, excelx, 1, avg, '', 12)
-    writexcel(sheet, excelx + 29, 1, t1, '', 0)
-    writexcel(sheet, excelx + 29, 1, t2, '', 6)
-    writexcel(sheet, excelx + 29, 1, t3, '', 12)
-    plt.plot(X, y, color='red', label='Online')
-    Coordinatedata.append(y)
+    workbook = xlwt.Workbook()
+    sheet = workbook.add_sheet('1')
+    sheet_2 = workbook.add_sheet('2')
+    result = {
+        'EXAM_F': [],
+        'EXAM_L': [],
+        'EXAM_AVG': [],
+        'POBL(1)': [],
+        'POBL(2)': [],
+        'POBL(5)': [],
+        'POBL(10)': [],
+        'APFD': [],
+        'RAUC': [],
+        'run_time': [],
+        'y': [],
+    }
 
-    # Random
-    y = [x for x in range(101)]
-    plt.plot(X, y, color='black', label='Random')
+    sheet.write(0, 0, 'EXAM_F', xlwt.easyxf(blue))
+    sheet.write(0, 1, 'EXAM_L', xlwt.easyxf(blue))
+    sheet.write(0, 2, 'EXAM_AVG', xlwt.easyxf(blue))
+    sheet.write(0, 3, 'POBL(1)', xlwt.easyxf(blue))
+    sheet.write(0, 4, 'POBL(2)', xlwt.easyxf(blue))
+    sheet.write(0, 5, 'POBL(5)', xlwt.easyxf(blue))
+    sheet.write(0, 6, 'POBL(10)', xlwt.easyxf(blue))
+    sheet.write(0, 7, 'APFD', xlwt.easyxf(blue))
+    sheet.write(0, 8, 'RAUC', xlwt.easyxf(blue))
+    sheet.write(0, 9, 'run_time', xlwt.easyxf(blue))
 
-    # uncertrainty
-    t1, t2, t3, f, l, avg, y, yb, ginidata, newbb = Uncertainty(feaVec, datatype)
-    np.save('F:/ICSEdata/RQ1data/MTFL/' + datatype + '_uncertainty_newclus.npy', ginidata)
-    np.save('F:/ICSEdata/RQ1data/MTFL/' + datatype + '_bb_uncertainty_newclus.npy', newbb)
-    writexcel(sheet, excelx, 4, f, '', 0)
-    writexcel(sheet, excelx, 4, l, '', 6)
-    writexcel(sheet, excelx, 4, avg, '', 12)
-    writexcel(sheet, excelx + 29, 4, t1, '', 0)
-    writexcel(sheet, excelx + 29, 4, t2, '', 6)
-    writexcel(sheet, excelx + 29, 4, t3, '', 12)
-    Coordinatedata.append(y)
-    plt.plot(X, y, linestyle='--', color='green', label='Uncertainty')
+    for i in range(3):
+        print('Now is ' + datatype + modeltype + '  :' + str(i))
+        if methodology == 'ours':
+            f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, y, yb, run_time = UPDATE(feaVec, datatype)
+        elif methodology == 'uncertainty':
+            f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, y, yb, run_time = Uncertainty(feaVec, datatype)
+        # round(x,6)
+        f, l, avg, pobl1, pobl2, pobl5, save10, apfd, rauc, run_time = round(f, 6), round(l, 6), round(avg, 6), round(
+            pobl1, 6), round(pobl2, 6), round(pobl5, 6), round(save10, 6), round(apfd, 6), round(rauc, 6), round(
+            run_time, 6)
 
-    Coordinatedata = np.array(Coordinatedata)
-    np.save('F:/ICSEdata/RQ1data/MTFL/' + datatype + '_Coordinatedata_newclus.npy', Coordinatedata)
+        result['EXAM_F'].append(f)
+        result['EXAM_L'].append(l)
+        result['EXAM_AVG'].append(avg)
+        result['POBL(1)'].append(pobl1)
+        result['POBL(2)'].append(pobl2)
+        result['POBL(5)'].append(pobl5)
+        result['POBL(10)'].append(save10)
+        result['APFD'].append(apfd)
+        result['RAUC'].append(rauc)
+        result['run_time'].append(run_time)
+        result['y'].append(y)
+        sheet.write(i + 1, 0, f, xlwt.easyxf(black))
+        sheet.write(i + 1, 1, l, xlwt.easyxf(black))
+        sheet.write(i + 1, 2, avg, xlwt.easyxf(black))
+        sheet.write(i + 1, 3, pobl1, xlwt.easyxf(black))
+        sheet.write(i + 1, 4, pobl2, xlwt.easyxf(black))
+        sheet.write(i + 1, 5, pobl5, xlwt.easyxf(black))
+        sheet.write(i + 1, 6, save10, xlwt.easyxf(black))
+        sheet.write(i + 1, 7, apfd, xlwt.easyxf(black))
+        sheet.write(i + 1, 8, rauc, xlwt.easyxf(black))
+        sheet.write(i + 1, 9, run_time, xlwt.easyxf(black))
 
-    plt.xlabel(r'$Percentage\ of\ test\ case\ executed$')
-    plt.ylabel(r'$Percentage\ of\ fault\ detected$')
-    plt.legend()
-    if datatype == 'D1':
-        plt.savefig('F:/ICSEdata/RQ1picture/MTFL_new/' + 'LabelNoise.pdf')
-    elif datatype == 'D2':
-        plt.savefig('F:/ICSEdata/RQ1picture/MTFL_new/' + 'DataNoise.pdf')
-    return sheet
+        if i == 0:
+            for j in range(len(y)):
+                sheet_2.write(i, j, round(yb[j], 6), xlwt.easyxf(blue))
+
+        for j in range(len(y)):
+            sheet_2.write(i + 1, j, round(y[j], 6), xlwt.easyxf(black))
+
+        workbook.save(workbook_save_path)
+
+    # compute the mean and std of the result
+    for i, key in enumerate(result.keys()):
+        if key == 'y':
+            # col mean
+            col_mean = np.mean(result[key], axis=0)
+            col_std = np.std(result[key], axis=0)
+            for j in range(len(col_mean)):
+                sheet_2.write(21, j, round(col_mean[j], 6), xlwt.easyxf(green))
+                sheet_2.write(22, j, round(col_std[j], 6), xlwt.easyxf(green))
+
+        else:
+            sheet.write(21, i, round(float(np.mean(result[key])), 6), xlwt.easyxf(green))
+            sheet.write(22, i, round(float(np.std(result[key])), 6), xlwt.easyxf(green))
+
+    workbook.save(workbook_save_path)
 
 
 if __name__ == "__main__":
-    # FeatureExtraction('D1')
-    feaVec = np.load('../MTFL/features/D1_feature_newclus.npy',
-                     allow_pickle=True)
-    start=time.time()
-    Uncertainty(feaVec, 'D1')
-    end=time.time()
-    print('执行时间:',end-start)
+    RQ1(dataset='MTFL', modeltype='', datatype='D2', methodology='uncertainty')
     # AT(feaVec, 'org')
     # ORGLABEL('D2')
     # datatype='org'
