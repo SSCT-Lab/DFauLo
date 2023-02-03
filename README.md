@@ -1,5 +1,5 @@
 # DFauLo 
-This repository is an implementation of the paper: **Data Fault Localization for Deep Learning Dataset**
+This repository is an implementation of the paper: **Dynamic Data Fault Localization for Deep Neural Networks**
 
 ![overview](./pictures/overview-v3_1.Png) 
 
