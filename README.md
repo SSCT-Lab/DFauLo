@@ -1,7 +1,7 @@
 # DFauLo 
 This repository is an implementation of the paper: **Dynamic Data Fault Localization for Deep Neural Networks**
 
-![overview](./pictures/overview-v3_1.Png) 
+![overview](./pictures/overviewISSTA-v1.jpg) 
 
 [comment]: <> (## Sequence of code execution in the repository)
 
