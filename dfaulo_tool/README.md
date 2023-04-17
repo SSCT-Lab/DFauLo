@@ -105,7 +105,7 @@ Parameter explanation:
 
 `--top_ratio ` : Percentage of fault data needed.
 
-`--retrain_epoch 10 ` : Epoch for model fine-tuning with DfauLo tool.
+`--retrain_epoch ` : Epoch for model fine-tuning with DfauLo tool.
 
 `--retrain_bs ` : BarchSize for model fine-tuning with DfauLo tool.
 
