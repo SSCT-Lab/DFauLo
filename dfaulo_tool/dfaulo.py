@@ -12,7 +12,7 @@ from sklearn.cluster import KMeans
 from tqdm import tqdm
 
 from utils.dataset import dataset
-from dataset.model import *
+from models.model import *
 import tensorflow as tf
 from sklearn.linear_model import LogisticRegression
 
@@ -90,7 +90,7 @@ class DfauLo():
         lg = LogisticRegression(C=1.0)
         lg.fit(sample_feature, Y)
 
-        LRres = lg.predict_proba(Feature)  ####@@@@
+        LRres = lg.predict_proba(Feature)
         LRres = LRres[:, 1]
 
         print('LRres shape: ', LRres.shape)

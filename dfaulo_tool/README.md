@@ -38,47 +38,83 @@ The implementation of **DfauLo** as a tool allows for the automatic location of 
 ## Installation
 `pip install -r requirements.txt`
 
-## Usage
-You should first prepare your classification dataset for data fault localization according to the following format (The root directory is the name of the dataset, the subordinate directory represents it as the training set, then each set directory is named by the class name of the dataset, and the images of the corresponding class are stored):
+## Requirement
+You should first prepare your classification dataset and classes file in **dataset** file for data fault localization according to the following format (The root directory is the name of the dataset, the subordinate directory represents it as the training set, then each set directory is named by the class name of the dataset, and the images of the corresponding class are stored):
 ```python
 MNIST # dataset name
 |-- train # trainset
-    |-- 0 # class name
+    |-- dog # class name
         |-- XX.png # corrensponding images
         |-- XX.png
         |-- ...
-    |-- 1
+    |-- cat
         |-- XX.png
         |-- XX.png
         |-- ...
     |-- ...
+|-- classes.json # class name and corresponding index
+```
+The `classes.json` file contains the corresponding index of the classes names when you are training the model. It needs to be written in the following form:
+```python
+{
+    "dog": 0,
+    "cat": 1,
+    "person": 2,
+     ...
+}
 ```
 Next you need to prepare a model trained on the above dataset (note that you need to provide the entire model and not just the parameters of the model) and the model's 
-optimizer and lr_scheduler (if available), we recommend that you save your model in the following form:
+optimizer, transform, loss function and lr_scheduler (if available) in **models** file, we recommend that you save your model in the following form:
 ```python
 torch.save({
-            "epoch": epoch, #optional
-            "model": model,
-            "optimizer": optimizer,
-            "lr_scheduler": lr_scheduler, #optional
-            "acc": 100 * correct / total #optional
-        }, './models/model.pth')
+    "epoch": epoch,  # optional
+    "optimizer": optimizer,
+    "transform": transform,
+    "loss_fn": criterion,
+    "lr_scheduler": lr_scheduler,  # optional
+    "acc": 100 * correct / total  # optional
+}, './models/model_args.pth')
+
+torch.save(model, './models/model.pth') # save the entire model
 ```
-Finally you can run our **DfauLo** tool by:
-+ `python DfauLo.py --dataset /yourdatasetpath --model /yourmodelpath --img_size '(28,28,3)'--retrain_epoch 10`
+Note that when training the model, using a `transform` with regularization can achieve better results for dfaulo.
+
+In addition, you need to provide your model structure `model.py` in **models** file(coded in Pytorch form). Check out our sample files if you're not clear about it.
+
+## Usage
+Finally you can run our **DfauLo** tool as the following example:
++ `python dfaulo.py --dataset './dataset/mnist' --model './models/model.pth' --image_size '(28,28,1)' --model_args './models/model_args.pth' --image_set 'train' --hook_layer 's4' --rm_ratio 0.05 --top_ratio 0.01 --retrain_epoch 10 --retrain_bs 64
+--slice_num 1
+ `
 
 Parameter explanation:
 
-`--dataset /yourdatasetpath` : Datasets requiring data fault localization
+`--dataset ` : Path of dataset requiring data fault localization.
 
-`--model /yourmodelpath` : Corresponding trained model
+`--model ` : Corresponding trained model.
 
-`--img_size '(28,28,3)'` : Model input image size in (w,h,d) format
+`--img_size ` : Model input image size in (w,h,d) format.
 
-`--retrain_epoch 10` : Epoch for model fine-tuning with DfauLo tool
+`--model_args ` : Other parameters of the model mentioned above.
 
+`--image_set ` : The associated set of datasets you need to perform **DfauLo**, usually 'train' or 'test'.
 
-Some `DfauLo.py` results on MNIST are shown below :
+`--hook_layer ` : The name of the model representation layer from which you need to extract features (We recommend using the second last linear layer).
+
+`--rm_ratio ` : Proportion of data to be removed when performing a mutation.
+
+`--top_ratio ` : Percentage of fault data needed.
+
+`--retrain_epoch 10 ` : Epoch for model fine-tuning with DfauLo tool.
+
+`--retrain_bs ` : BarchSize for model fine-tuning with DfauLo tool.
+
+`--slice_num ` : The number of slices performed on the dataset. If your dataset is large, we recommend running **DfauLo** with this parameter to split the dataset into multiple subsets equally. This helps prevent memory overflows and speeds up **DfauLo** in some cases, but also reduces the accuracy.
+
+The tool will generate the **located_image_list.txt** file in the subdirectory of the dataset input. with the paths to the images we located on your dataset that contain faults.
+
+## Example
+Some `DfauLo.py` results on benchmark **MNIST** are shown below :
 <div><table frame=void>	<!--用了<div>进行封装-->
 	<tr>
         <td><div><center>	<!--每个格子内是图片加标题-->
