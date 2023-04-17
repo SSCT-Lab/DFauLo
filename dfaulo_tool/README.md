@@ -82,7 +82,7 @@ Note that when training the model, using a `transform` with regularization can a
 In addition, you need to provide your model structure `model.py` in **models** file(coded in Pytorch form). Check out our sample files if you're not clear about it.
 
 ## Usage
-Finally you can run our **DfauLo** tool as the following example:
+When having everything above ready, you can run our **DfauLo** tool as the following example:
 + `python dfaulo.py --dataset './dataset/mnist' --model './models/model.pth' --image_size '(28,28,1)' --model_args './models/model_args.pth' --image_set 'train' --hook_layer 's4' --rm_ratio 0.05 --top_ratio 0.01 --retrain_epoch 10 --retrain_bs 64
 --slice_num 1
  `
