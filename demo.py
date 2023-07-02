@@ -19,7 +19,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
-from train_model.models import LeNet5
+from _exp_.train_model.models import LeNet5
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s -  %(message)s')
