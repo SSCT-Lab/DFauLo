@@ -358,7 +358,7 @@ if __name__ == "__main__":
     # orgdata = np.load('H:\\ASEprj\\Code\\data\\MNIST\MNIST_PNG\\alllabeltraindata.npy', allow_pickle=True)
 
     model = LeNet5()
-    state_dict = torch.load('./demodata/mnist_original_LeNet5.pth')
+    state_dict = torch.load('demodata/mnist_original_LeNet5.pth')
     model.load_state_dict(state_dict)
 
     OPAdata = OAP(dataprg=orgdata,
