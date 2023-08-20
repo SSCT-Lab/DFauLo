@@ -38,7 +38,10 @@ The implementation of **DfauLo** as a tool allows for the automatic location of 
 ## Installation
 `pip install -r requirements.txt`
 
-## Requirement
+## Run DFauLo
+We prepared a complete demo running **DFauLo** on the EMNIST dataset mentioned in the paper. You can run this demo by directly executing:
++ `python dfaulo.py`
+## Run **DFauLo** on Custom Datasets
 You should first prepare your classification dataset and classes file in **dataset** file for data fault localization according to the following format (The root directory is the name of the dataset, the subordinate directory represents it as the training set, then each set directory is named by the class name of the dataset, and the images of the corresponding class are stored):
 ```python
 MNIST # dataset name
@@ -84,7 +87,7 @@ Note that when training the model, using a `transform` with regularization can a
 
 In addition, you need to provide your model structure `model.py` in **models** file(coded in Pytorch form). Check out our sample files if you're not clear about it.
 
-## Usage
+
 When having everything above ready, you can run our **DfauLo** tool as the following example:
 + `python dfaulo.py --dataset './dataset/mnist' --model './models/model.pth' --model_name 'LeNet1' --class_path './dataset/mnist_classes.json' --image_size '(28,28,1)' --model_args './models/model_args.pth' --image_set 'train' --hook_layer 's4' --rm_ratio 0.05 --retrain_epoch 10 --retrain_bs 64
  `
