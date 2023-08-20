@@ -855,3 +855,44 @@ def data_slice(args, path_dir, slice_num=1):
             result[i][name] = img_list[i * slice_len:(i + 1) * slice_len]
     print('data slice done with slice num: ', slice_num)
     return result
+
+
+DataSet = 'EMNIST'
+NoiseType = 'CaseStudyData'
+Model = 'WaveMix'
+hook_layer = 'conv'
+image_size = '(32, 32, 3)'
+random.seed(2023)
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset', default='./dataset/' + NoiseType + '/' + DataSet, help='input dataset')
+parser.add_argument('--model', default='./dataset/' + NoiseType + '/' + DataSet + '/' + Model + '.pth',
+                    help='input model path')
+parser.add_argument('--model_name', default=Model, help='input model path')
+parser.add_argument('--class_path', default='./dataset/' + DataSet.lower() + '_classes.json',
+                    help='input model path')
+parser.add_argument('--image_size', default=image_size, help='input image size')
+parser.add_argument('--model_args', default='./dataset/' + DataSet.lower() + '_model_args.pth',
+                    help='input model args path')
+parser.add_argument('--image_set', default='train', help='input image set')
+parser.add_argument('--hook_layer', default=hook_layer, help='input hook layer')
+parser.add_argument('--rm_ratio', default=0.05, help='input ratio')
+parser.add_argument('--retrain_epoch', default=10, help='input retrain epoch')
+parser.add_argument('--retrain_bs', default=64, help='input retrain batch size')
+parser.add_argument('--slice_num', default=1, help='input slice num')
+parser.add_argument('--ablation', default='None', help='input slice num')
+
+args = parser.parse_args()
+args.slice_num = int(args.slice_num)
+args.rm_ratio = float(args.rm_ratio)
+args.retrain_epoch = int(args.retrain_epoch)
+args.retrain_bs = int(args.retrain_bs)
+if DataSet!='MTFL':
+    data_s = data_slice(args, args.dataset + '/' + args.image_set, args.slice_num)
+else:
+    data_s = [None]
+
+results = []
+df = DfauLo(args)
+
+noManual_results_list, Manual_results_list, noManual_sorted_score_list, Manual_sorted_score_list, dfaulo_time = df.run(
+    data_s[0])
