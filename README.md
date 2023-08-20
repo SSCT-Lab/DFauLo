@@ -5,10 +5,6 @@ This repository is the official implementation of the tool **DfauLo**.
 
 **DfauLo** is a dynamic data fault localization tool for deep neural networks (DNNs), which can locate mislabeled and noisy data in the deep learning datasets. Inspired by conventional mutation-based code fault localization, **DfauLo** generates multiple DNN model mutants of the original trained DNN model and maps the extracted features into a suspiciousness score indicating the probability of the given data being a data fault. **DfauLo** is the first dynamic data fault localization technique, prioritizing the suspected data based on user feedback and providing the generalizability to unseen data faults during training.
 
-The tool works by taking *a trained model and its optimizer and lr_scheduler (if available)*, and *a (classification) dataset* for data fault localization in the required format. It then generates multiple DNN model mutants, extracts features from these mutants, and maps the extracted features into a suspiciousness score indicating the probability of the given data being a data fault. The user can then prioritize the suspected data for manual checking and correction to improve the data quality with minimal effort. The tool can effectively locate different types of data faults and improve the model performance by correcting the located faults.
-
-The implementation of **DfauLo** as a tool allows for the automatic location of data faults hidden in deep learning datasets. It is applicable for various types of deep learning datasets and can be used to validate the data quality for DNNs. The source code for the tool is available for use and can be customized according to specific requirements.
-
 
 ![overview](pictures/overviewISSTA-v1.jpg) 
 
@@ -38,10 +34,19 @@ The implementation of **DfauLo** as a tool allows for the automatic location of 
 ## Installation
 `pip install -r requirements.txt`
 
-## Run DFauLo
+## Usage
 We prepared a complete demo running **DFauLo** on the EMNIST dataset mentioned in the paper. You can run this demo by directly executing:
-+ `python dfaulo.py`
-## Run **DFauLo** on Custom Datasets
+
+`python dfaulo.py`
+
+If you want to reproduce our experimental results:
++ You should first download our data&model via: https://pan.baidu.com/s/1i9CKNWfULaMlaNMs7QRgaw?pwd=dflo **Extract code**: `dflo`
++ **For RQ1 & RQ3:** you should check and run the `python exp_effective.py`
++ **For RQ2:** you should check and run the `python exp_ablation.py`
++ **For RQ4:** you should check and run the `python retrain.py`
+
+
+## Run **DFauLo** on any Custom Datasets
 You should first prepare your classification dataset and classes file in **dataset** file for data fault localization according to the following format (The root directory is the name of the dataset, the subordinate directory represents it as the training set, then each set directory is named by the class name of the dataset, and the images of the corresponding class are stored):
 ```python
 MNIST # dataset name
