@@ -6,3 +6,5 @@
 *.iml
 out
 gen
+dfaulo_audio/AudioClassification-Pytorch/dataset
+dfaulo_audio/AudioClassification-Pytorch/models
