@@ -5,6 +5,9 @@
 ## 直接运行
 先下载数据：
 
+链接：https://pan.baidu.com/s/1gTXwV2llGIgVU6PvxtcMaw?pwd=dfad 
+提取码：dfad 
+
 运行`python exp_effective.py`
 
 运行结果：
