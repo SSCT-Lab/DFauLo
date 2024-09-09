@@ -94,8 +94,14 @@ In addition, you need to provide your model structure `model.py` in **models** f
 
 
 When having everything above ready, you can run our **DfauLo** tool as the following example:
-+ `python dfaulo.py --dataset './dataset/mnist' --model './models/model.pth' --model_name 'LeNet1' --class_path './dataset/mnist_classes.json' --image_size '(28,28,1)' --model_args './models/model_args.pth' --image_set 'train' --hook_layer 's4' --rm_ratio 0.05 --retrain_epoch 10 --retrain_bs 64
- `
+
+Note: Please download the data in the above cloud disk before running it.
+
+Run **DfauLo** on MNIST (image-classification dataset) example (dataset's fault type: RandomLabelNoise):
++ `python dfaulo.py --dataset './dataset/RandomLabelNoise/MNIST' --model './dataset/RandomLabelNoise/MNIST/LeNet1.pth' --model_name 'LeNet1' --class_path './dataset/mnist_classes.json' --image_size '(28,28,1)' --model_args './models/model_args.pth' --image_set 'train' --hook_layer 's4' --rm_ratio 0.05 --retrain_epoch 10 --retrain_bs 64`
+
+Run **DfauLo** on AgNews (text-classification dataset) example (dataset's fault type: RandomLabelNoise):
++ `python dfaulo.py --dataset './dataset/RandomLabelNoise/AgNews' --model './dataset/RandomLabelNoise/MNIST/LSTM.pth' --model_name 'LSTM' --class_path './dataset/agnews_classes.json' --image_size 'None' --model_args './models/model_args.pth' --image_set 'train' --hook_layer 'fc1' --rm_ratio 0.05 --retrain_epoch 10 --retrain_bs 64`
 
 Parameter explanation:
 

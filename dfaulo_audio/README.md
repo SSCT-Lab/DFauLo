@@ -10,6 +10,9 @@
 
 运行`python exp_effective.py`
 
+或者：
++ `python dfaulo.py --dataset './AudioClassification-Pytorch/dataset/train_rln' --model './AudioClassification-Pytorch/models/rln/TDNN_Fbank/last_model/model.pth' --model_name 'TDNN' --class_path './AudioClassification-Pytorch/dataset/classes.json' --image_size -1 --model_args None --image_set 'train' --hook_layer 'bn6' --rm_ratio 0.05 --retrain_epoch 10 --retrain_bs 64`
+
 运行结果：
 
 ![alt text](image-1.png)

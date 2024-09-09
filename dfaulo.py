@@ -16,7 +16,6 @@ from tqdm import tqdm
 import torch
 from utils.dataset import dataset
 from utils.models import *
-import tensorflow as tf
 from sklearn.linear_model import LogisticRegression
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
