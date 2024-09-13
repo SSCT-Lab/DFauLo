@@ -1,10 +1,8 @@
-opencv-python~=4.5.2.52
+opencv-python~=4.5.3.56
 numpy~=1.24.3
-tensorflow-gpu~=2.8.0
 pillow~=9.5.0
 matplotlib~=3.7.1
 pyod~=0.9.9
-torchvision~=0.14.1+cu117
 scikit-learn~=1.2.2
 tqdm~=4.65.0
 cleanlab~=2.0.0
