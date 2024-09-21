@@ -39,7 +39,7 @@ image_size = -1
 hook_layer = "bn6"
 random.seed(2023)
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', default="./AudioClassification-Pytorch/dataset/MAD_train_rln", help='input dataset')
+parser.add_argument('--dataset', default="./AudioClassification-Pytorch/dataset/MAD_train_rdn", help='input dataset')
 parser.add_argument('--model', default=model_path,
                     help='input model path')
 parser.add_argument('--model_name', default=Model, help='input model path')

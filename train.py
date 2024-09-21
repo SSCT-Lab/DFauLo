@@ -14,19 +14,19 @@ import torch
 from wavemix.classification import WaveMix
 # args
 
-dataset_name = 'MNIST'
-model_name = 'LeNet5'
-fault_type = 'OriginalTrainData'
-class_path = './dataset/mnist_classes.json'
-image_size = (28, 28, 1)
+dataset_name = 'RESISC45' #64.0 %
+model_name = 'WaveMix'
+fault_type = 'RandomLabelNoise'
+class_path = './dataset/resisc45_classes.json'
+image_size = (256, 256, 3)
 lr = 0.001
 epoches = 20
-batch_size = 64
+batch_size = 32
 #
 
 if model_name == 'WaveMix':
     model = WaveMix(
-        num_classes=26,
+        num_classes=45,
         depth=4,
         mult=2,
         ff_channel=48,
@@ -37,6 +37,7 @@ if model_name == 'WaveMix':
     )
 else:
     model = eval(model_name)()
+
 
 
 def data_slice(path_dir):
@@ -62,7 +63,7 @@ def data_slice(path_dir):
 
 transform = transforms.Compose([
     # MNIST transform
-    transforms.Grayscale(num_output_channels=1),
+    # transforms.Grayscale(num_output_channels=1),
     transforms.ToTensor(),
 ])
 
@@ -91,11 +92,14 @@ test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-# lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[9, 13], gamma=0.1)
+# lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[9, 16], gamma=0.1)
 assert os.path.exists('./dataset/' + fault_type + '/' + dataset_name + '/')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 model.to(device)
+print(model)
+exit(0)
+
 for epoch in range(epoches):
     model.train()
     for i, (images, labels, _) in enumerate(train_loader):

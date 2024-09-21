@@ -6,10 +6,10 @@ from macls.utils.utils import add_arguments, print_arguments
 
 parser = argparse.ArgumentParser(description=__doc__)
 add_arg = functools.partial(add_arguments, argparser=parser)
-add_arg('configs',          str,    'configs/tdnn_train.yml',        '配置文件')
+add_arg('configs',          str,    'configs/mad_tdnn_train.yml',        '配置文件')
 add_arg("local_rank",       int,    0,                          '多卡训练需要的参数')
 add_arg("use_gpu",          bool,   True,                       '是否使用GPU训练')
-add_arg('save_model_path',  str,    'models/rln/',                  '模型保存的路径')
+add_arg('save_model_path',  str,    'models/MAD/',                  '模型保存的路径')
 add_arg('resume_model',     str,    None,
         '恢复训练，当为None则不使用预训练模型')
 add_arg('pretrained_model', str,    None,

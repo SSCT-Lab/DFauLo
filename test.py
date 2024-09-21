@@ -1,23 +1,34 @@
-import torch
-from torchtext.datasets import AG_NEWS
-from torchtext.data.utils import get_tokenizer
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.font_manager as fm
+font_path = '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'
+font_prop = fm.FontProperties(fname=font_path, size=10)  # 调整字体大小
+# 数据
+data = [3.0482065677642822, 2.9238059520721436, 3.843790292739868]
 
-# 下载并加载AG News数据集
-train_iter = AG_NEWS(split='train')
+# 设置图形大小
+plt.figure(figsize=(10, 2))
 
-# 使用basic_english分词器
-tokenizer = get_tokenizer("basic_english")
+# 绘制数据点
+# for i, value in enumerate(data):
+plt.plot(data[0], 1, 'o', label=f'正常数据-1')
+plt.plot(data[1], 1, 'o', label=f'正常数据-2')
+plt.plot(data[2], 1, 'o', label=f'缺陷数据')
 
-max_token_length = 0
-longest_token = ""
+# 设置 x 轴的范围
+plt.xlim(min(data) - 0.5, max(data) + 0.5)
 
-# 遍历数据集，统计最长的token
-for label, line in train_iter:
-    tokens = tokenizer(line)
-    for token in tokens:
-        if len(token) > max_token_length:
-            max_token_length = len(token)
-            longest_token = token
+# 去掉 y 轴
+plt.yticks([])
 
-print(f"Longest token: {longest_token}")
-print(f"Length of the longest token: {max_token_length}")
+# 添加网格线
+plt.grid(axis='x')
+plt.legend(prop=font_prop)
+# 添加图例
+
+
+# 设置标题
+plt.title('输出层内部异常行为与缺陷触发关系',fontproperties=font_prop)
+
+# 显示图形
+plt.savefig('plot.png')

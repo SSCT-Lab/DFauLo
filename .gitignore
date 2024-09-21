@@ -9,3 +9,12 @@ gen
 dfaulo_audio/AudioClassification-Pytorch/dataset
 dfaulo_audio/AudioClassification-Pytorch/models
 .vscode
+dataset/RESISC45
+dataset/OriginalTestData/RESISC45
+dataset/RandomLabelNoise/
+PCA.png
+PCA3D.png
+plot.png
+dataset/resisc45_model_args.pth
+dataset/CaseStudyData/EMNIST/mutmodel/WaveMix/model.pth
+*.pyc

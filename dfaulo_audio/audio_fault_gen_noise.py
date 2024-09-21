@@ -11,9 +11,9 @@ random.seed(1216)
 data_path = "./AudioClassification-Pytorch/dataset/MAD_train_list_features.txt"
 org_data_path = "./AudioClassification-Pytorch/dataset/MAD_train_list.txt"
 
-# Random Lable Noise
-rln_data_path = "./AudioClassification-Pytorch/dataset/MAD_train_rln/train/"
-org_rln_data_path = "./AudioClassification-Pytorch/dataset/MAD_train_rln_list.txt"
+# Random DATA Noise
+rln_data_path = "./AudioClassification-Pytorch/dataset/MAD_train_rdn/train/"
+org_rln_data_path = "./AudioClassification-Pytorch/dataset/MAD_train_rdn_list.txt"
 
 classes = {
     "0": 0,
@@ -47,15 +47,22 @@ for i, line in enumerate(lines):
     category_id = eval(line.split("\t")[1])
     new_category_id = category_id
     is_fault = False
-    if i in idx_list:
-        while new_category_id == category_id:
-            new_category_id = random.randint(0, 6)
-        assert new_category_id != category_id
+    if i not in idx_list:
+        new_path = f"{rln_data_path}{classesid2name[new_category_id]}/"
+        new_source_name = source_path.split("/")[-1]
+        os.system(f"cp ./AudioClassification-Pytorch/{source_path} {new_path}")
+    else:
         fault_cnt += 1
         is_fault = True
-    new_path = f"{rln_data_path}{classesid2name[new_category_id]}/"
-    new_source_name = source_path.split("/")[-1]
-    os.system(f"cp ./AudioClassification-Pytorch/{source_path} {new_path}")
+        new_path = f"{rln_data_path}{classesid2name[new_category_id]}/"
+        new_data_path = './AudioClassification-Pytorch/dataset/train_rln/train/' #UrbanSound8K
+        new_data_label_list=os.listdir(new_data_path)
+        # random select a new data
+        new_data_label = random.choice(new_data_label_list)
+        new_data_list = os.listdir(new_data_path+new_data_label)
+        new_data = random.choice(new_data_list)
+        os.system(f"cp {new_data_path}{new_data_label}/{new_data} {new_path}")
+        new_source_name = new_data
     name2isfault[new_path+new_source_name] = is_fault
     with open(org_rln_data_path, "a") as f:
         f.write(f"{org_source_path}\t{new_category_id}\n")

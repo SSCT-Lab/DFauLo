@@ -2,7 +2,48 @@
 # 将Dfaulo用于Audio分类问题
 
 
-## 直接运行
+## MAD js数据集适配：
+
+### 训练模型
+
+`python train.py`
+
+RandomLabelNoise训练结果:
+
+`Test epoch: 60, time/epoch: 0:00:04.075886, loss: 0.35070, accuracy: 0.90315`
+
+### 运行Dfaulo
+
+#### 类别缺陷：
+
+`python exp_effective.py`
+
+结果（项目指标即下图中的RAUC值）：
+
+![alt text](image-2.png)
+
+RAUC曲线：
+
+![alt text](RAUC.png)
+
+#### 噪声缺陷:
+
+`python exp_effective_noise.py`
+
+![alt text](image-3.png)
+
+RAUC曲线：
+
+![alt text](RAUC-noise.png)
+
+时间效率：
+
+dfaulo time:  {'Select Subset': 45.52100992202759, 'Mutation&Extraction': 63.106096267700195, 'Initialize Susp': 0.09430122375488281, 'Update Susp': 0.02017354965209961, 'all': 108.74158096313477}
+
+$ \frac{108s}{4686} = 23ms/it$
+
+
+## UrbanSound8k数据集适配：
 先下载数据：
 
 链接：https://pan.baidu.com/s/1gTXwV2llGIgVU6PvxtcMaw?pwd=dfad 

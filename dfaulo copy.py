@@ -11,12 +11,11 @@ import numpy as np
 
 from pyod.models.vae import VAE
 from sklearn.cluster import KMeans
-from torch import le, nn, tensor, utils
+from torch import nn, utils
 from tqdm import tqdm
 import torch
-from dataset import MAClsDataset
-from tdnn import TDNN, SpecAug
-
+from utils.dataset import dataset
+from utils.models import *
 from sklearn.linear_model import LogisticRegression
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -25,9 +24,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class DfauLo():
     def __init__(self, args):
         self.args = args
-        self.spec_aug = SpecAug()
-        self.classes = self.load_json(self.args.class_path)
-        self.class_num = len(self.classes.keys())
+        classes = self.load_json(self.args.class_path)
+        self.class_num = len(classes.keys())
         # creat dir
         if not os.path.exists(os.path.join(self.args.dataset, 'feature/' + self.args.model_name)):
             os.makedirs(os.path.join(self.args.dataset, 'feature/' + self.args.model_name))
@@ -142,7 +140,7 @@ class DfauLo():
         return noManual_results_list, Manual_results_list, noManual_sorted_score_list, Manual_sorted_score_list, dfaulo_time
 
     def Feature_Summary(self, data_s):
-        model = TDNN(num_class=7)
+        model = eval(self.args.model_name)()
         model.load_state_dict(torch.load(self.args.model))
         torch.save(model, os.path.join(self.args.dataset, 'mutmodel/' + self.args.model_name + '/model.pth'))
 
@@ -497,49 +495,25 @@ class DfauLo():
         Update_Susp_end_time = time.time()
         Update_Susp_time = Update_Susp_end_time - Update_Susp_start_time
         return image_list_accumulation.tolist(), sorted_score_accumulation.tolist(), Update_Susp_time
-    
-    def collate_fn(self, batch):
-        # 找出音频长度最长的
-        batch_sorted = sorted(batch, key=lambda sample: sample[0].size(0), reverse=True)
-        freq_size = batch_sorted[0][0].size(1)
-        max_freq_length = batch_sorted[0][0].size(0)
-        batch_size = len(batch_sorted)
-        
-        # 以最大的长度创建0张量
-        features = torch.zeros((batch_size, max_freq_length, freq_size), dtype=torch.float32)
-        input_lens, labels, data_paths = [], [], []
-        
-        for x in range(batch_size):
-            tensor, label, data_path = batch[x]
-            seq_length = tensor.size(0)
-            
-            # 将数据插入都0张量中，实现了padding
-            features[x, :seq_length, :] = tensor[:, :]
-            labels.append(label)
-            input_lens.append(seq_length)
-            data_paths.append(data_path)
-        
-        labels = torch.tensor(labels, dtype=torch.int64)
-        input_lens = torch.tensor(input_lens, dtype=torch.int64)
-        
-        return features, labels, input_lens, data_paths
-    
+
     def OAL(self, data_s):
         args = self.args
-        model = eval(self.args.model_name)(num_class=7)
-        
+        model = eval(self.args.model_name)()
         model.load_state_dict(torch.load(self.args.model))
-        loss_fn = torch.nn.CrossEntropyLoss()
-        model.eval()
+        modelargs = torch.load(args.model_args)
+        loss_fn = modelargs['loss_fn']
+
         with open(self.args.class_path, 'r') as f:
-            self.classes = json.load(f)
-        class_keys = list(self.classes.keys())
+            classes = json.load(f)
+        class_keys = list(classes.keys())
         vae_del_list, km_del_list, loss_del_list = [], [], []
 
         for specific_label in class_keys:
 
-            dataset_ = MAClsDataset(data_list_path=self.args.dataset,mode = "eval", classes=self.classes,label_spc=specific_label)
-            data_loader = torch.utils.data.DataLoader(dataset_, batch_size=1, shuffle=False, num_workers=0, collate_fn = self.collate_fn)
+            dataset_ = dataset(root=args.dataset, classes_path=self.args.class_path, transform=modelargs['transform'],
+                               image_size=eval(args.image_size), image_set=args.image_set,
+                               specific_label=specific_label, data_s=data_s)
+            data_loader = torch.utils.data.DataLoader(dataset_, batch_size=1, shuffle=False, num_workers=0)
 
             print('\nrunning OAL on label: ', specific_label)
 
@@ -554,26 +528,14 @@ class DfauLo():
             softmax_func = nn.Softmax(dim=1)
             model.eval()
             vae_data = []
-            self.spec_aug.to(device)
             with torch.no_grad():
                 for i, data in enumerate(data_loader):
-                    images, labels,_, image_paths = data
-                    images=self.spec_aug(images)
-                    fea = images.cpu().numpy().reshape(-1).tolist()
-                    # padding fea to 23840
-                    fea = fea + [1] * (23840 - len(fea))
-                    
-                    vae_data.append(fea)
-                    
+                    images, labels, image_paths = data
+                    vae_data.append(images.cpu().numpy().reshape(-1).tolist())
                     if self.args.model_name == 'TCDCNN':
                         out = model(images.float().to(device))
                     else:
-                        try:
-                            out = model(images.to(device))
-                        except:
-                            out = tensor([[ 0.0, 0.0, 0.0, 0.0,  0.0,0.0, 0.0,  0.0, 0.0, 0.0]])
-                            out = out.to(device)
-                            print("failed once!")
+                        out = model(images.to(device))
                     labels = labels.to(device)
                     print('\r', 'processing image: ', i, end='')
                     if self.args.model == 'ResNet':
@@ -591,8 +553,7 @@ class DfauLo():
                     image_list.append(image_paths[0])
 
             vae_data = np.array(vae_data)
-            print(vae_data.shape)
-            vae = VAE(verbose=2,lr=1e-4)
+            vae = VAE(epochs=5, verbose=2)
             vae.fit(vae_data)
             vae_decision_scores_ = vae.decision_scores_
 
@@ -628,31 +589,31 @@ class DfauLo():
     def mutation(self, del_list, data_s, save_path):
         args = self.args
 
-        model = eval(self.args.model_name)(num_class=7)
+        model = eval(self.args.model_name)()
         model.load_state_dict(torch.load(self.args.model))
-        # modelargs = torch.load(args.model_args)
+        modelargs = torch.load(args.model_args)
         loss_fn = nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-        # if modelargs['optimizer'] == 'SGD':
-        #     if self.args.model == 'ResNet' or self.args.model == 'VGG':
-        #         optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-        #     elif self.args.model == 'TCDCNN':
-        #         optimizer = torch.optim.SGD(model.parameters(), lr=0.003)
-        #     else:
-        #         optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-        # elif modelargs['optimizer'] == 'Adam':
-        #     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-        # else:
-        #     raise ValueError('optimizer not supported')
-        dataset_ = MAClsDataset(data_list_path=self.args.dataset, mode = "train", classes=self.classes,ignore_list=del_list)
-        data_loader = torch.utils.data.DataLoader(dataset_, batch_size=64, shuffle=True, num_workers=0, collate_fn = self.collate_fn)
+        if modelargs['optimizer'] == 'SGD':
+            if self.args.model == 'ResNet' or self.args.model == 'VGG':
+                optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+            elif self.args.model == 'TCDCNN':
+                optimizer = torch.optim.SGD(model.parameters(), lr=0.003)
+            else:
+                optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+        elif modelargs['optimizer'] == 'Adam':
+            optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+        else:
+            raise ValueError('optimizer not supported')
+        datasets = dataset(root=args.dataset, classes_path=self.args.class_path, transform=modelargs['transform'],
+                           image_size=eval(args.image_size), image_set=args.image_set,
+                           ignore_list=del_list, data_s=data_s)
+        data_loader = torch.utils.data.DataLoader(datasets, batch_size=args.retrain_bs, shuffle=True, num_workers=0)
 
         model.to(device)
         model.train()
         for epoch in range(args.retrain_epoch):
             for i, data in enumerate(data_loader):
-                images, labels,_, image_paths = data
-                images=self.spec_aug(images)
+                images, labels, image_paths = data
                 if self.args.model_name == 'TCDCNN':
                     out = model(images.to(device).float())
                 else:
@@ -669,23 +630,29 @@ class DfauLo():
                 print('\r', 'epoch: ', epoch, 'processing batch: ', i, end='')
         model.eval()
         dataset_name = args.dataset.split('/')[-1]
-        dataset_ = MAClsDataset(data_list_path=self.args.dataset, mode = "eval", classes=self.classes)
-        test_loader = torch.utils.data.DataLoader(dataset_, batch_size=1, shuffle=False, num_workers=0, collate_fn = self.collate_fn)
+        if self.args.model_name != 'TCDCNN':
+            test_data_s = data_slice(self.args, './dataset/OriginalTestData/' + dataset_name + '/test')[0]
+        else:
+            test_data_s = [None]
+        test_data = dataset(root='./dataset/OriginalTestData/' + dataset_name,
+                            classes_path=self.args.class_path,
+                            transform=modelargs['transform'],
+                            image_size=eval(args.image_size),
+                            image_set='test',
+                            specific_label=None,
+                            ignore_list=[],
+                            data_s=test_data_s)
+        test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, num_workers=0)
         with torch.no_grad():
             correct = 0
             total = 0
             mse_list = []
             for data in test_loader:
-                images, labels, _,_ = data
+                images, labels, _ = data
                 if self.args.model_name == 'TCDCNN':
                     outputs = model(images.float().to(device))
                 else:
-                    try:
-                        outputs = model(images.to(device))
-                    except:
-                        outputs = tensor([[ 0.0, 0.0, 0.0, 0.0,  0.0,0.0, 0.0,  0.0, 0.0, 0.0]])
-                        outputs = outputs.to(device)
-                        print("failed once!")
+                    outputs = model(images.to(device))
                 if self.args.model_name == 'TCDCNN':
                     accuracy = model.accuracy(outputs, labels.float().to(device))
                     mse_list.append(accuracy)
@@ -695,9 +662,9 @@ class DfauLo():
                     total += labels.size(0)
                     correct += (predicted == labels).sum().item()
             if self.args.model_name == 'TCDCNN':
-                print('Test Accuracy before mutation on test set: {} '.format(sum(mse_list) / len(mse_list)))
+                print('Test Accuracy before mutation on test set: {} %'.format(sum(mse_list) / len(mse_list)))
             else:
-                print('Test Accuracy after mutation on test set: {} '.format(correct / total))
+                print('Test Accuracy after mutation on test set: {} %'.format(correct / total))
         print('mutation done!')
         # save model
         torch.save(model, os.path.join(args.dataset, 'mutmodel/' + args.model_name + '/' + save_path))
@@ -705,10 +672,11 @@ class DfauLo():
 
     def get_feature(self, model, model_vae, model_km, model_loss, data_s):
         args = self.args
-        # modelargs = torch.load(args.model_args)
-        dataset_ = MAClsDataset(data_list_path=self.args.dataset, mode = "eval", classes=self.classes)
-        data_loader = torch.utils.data.DataLoader(dataset_, batch_size=1, shuffle=False, num_workers=0, collate_fn = self.collate_fn)
-        loss_fn = nn.CrossEntropyLoss()
+        modelargs = torch.load(args.model_args)
+        datasets = dataset(root=args.dataset, classes_path=self.args.class_path, transform=modelargs['transform'],
+                           image_size=eval(args.image_size), image_set=args.image_set, data_s=data_s)
+        data_loader = torch.utils.data.DataLoader(datasets, batch_size=1, shuffle=False, num_workers=0)
+        loss_fn = modelargs['loss_fn']
         softmax_func = nn.Softmax(dim=1)
         model.eval()
         model_vae.eval()
@@ -726,38 +694,16 @@ class DfauLo():
         loss_SFM_list, loss_Loss_list = [], []
         with torch.no_grad():
             for i, data in enumerate(data_loader):
-                images, labels, _,image_paths = data
-                # print(images.shape)
+                images, labels, image_paths = data
                 print('\r', 'get feature processing: ', i, end='')
                 if self.args.model_name == 'TCDCNN':
                     images = images.float()
                     labels = labels.float()
-                try:
-                    org_out = model(images.to(device))
-                except:
-                    org_out = tensor([[ 0.0, 0.0, 0.0, 0.0,  0.0,0.0, 0.0,  0.0, 0.0, 0.0]])
-                    org_out = org_out.to(device)
-                    print("failed once!")
-                try:
-                    vae_out = model_vae(images.to(device))
-                except:
-                    vae_out = tensor([[ 0.0, 0.0, 0.0, 0.0,  0.0,0.0, 0.0,  0.0, 0.0, 0.0]])
-                    vae_out = vae_out.to(device)
-                    print("failed once!")
-                try:
-                    km_out = model_km(images.to(device))
-                except:
-                    km_out = tensor([[ 0.0, 0.0, 0.0, 0.0,  0.0,0.0, 0.0,  0.0, 0.0, 0.0]])
-                    km_out = km_out.to(device)
-                    print("failed once!")
-                try:
-                    loss_out = model_loss(images.to(device))
-                except:
-                    loss_out = tensor([[ 0.0, 0.0, 0.0, 0.0,  0.0,0.0, 0.0,  0.0, 0.0, 0.0]])
-                    loss_out = loss_out.to(device)
-                    print("failed once!")
-                
-                
+                org_out = model(images.to(device))
+                vae_out = model_vae(images.to(device))
+                km_out = model_km(images.to(device))
+                loss_out = model_loss(images.to(device))
+
                 # Loss
                 labels = labels.to(device)
                 if self.args.model_name == 'TCDCNN':
@@ -805,12 +751,12 @@ class DfauLo():
             loss_SFM_list, loss_Loss_list)
 
     def getrandomfeature(self, model_org, model_vae, model_km, model_loss, class_num):
-        # modelargs = torch.load(self.args.model_args)
+        modelargs = torch.load(self.args.model_args)
 
         def model_out(model, X, Y):
             model.to(device)
             model.eval()
-            loss_fn = nn.CrossEntropyLoss()
+            loss_fn = modelargs['loss_fn']
             softmax_func = nn.Softmax(dim=1)
 
             with torch.no_grad():
@@ -831,20 +777,24 @@ class DfauLo():
                     sfout = soft_output.cpu().numpy()[0].tolist()
             return sfout, loss
 
-        # image_size = eval(self.args.image_size)
-        
-        X = torch.rand(1, 298, 80)
+        image_size = eval(self.args.image_size)
 
-        
+        if eval(self.args.image_size) == None and self.args.model_name != 'TCDCNN':
+            X = torch.randint(0, 95805, (1, 100))
+        elif self.args.model_name == 'TCDCNN':
+            X = torch.rand(1, 1, 40, 40)
+
+        else:
+            X = torch.rand(1, image_size[2], image_size[0], image_size[1])
 
         Feature = []
-
-        class_num = 7
+        if self.args.model_name == 'TCDCNN':
+            class_num = 100
         for i in range(class_num):
 
 
             if self.args.model_name == 'TCDCNN':
-                label = np.zeros((1, 7))
+                label = np.zeros((1, 10))
                 for i in range(10):
                     label[0, i] = 0 + (40 - 0) * np.random.random()
                 label = label.astype('float64')
@@ -906,42 +856,42 @@ def data_slice(args, path_dir, slice_num=1):
     return result
 
 
-# DataSet = 'EMNIST'
-# NoiseType = 'CaseStudyData'
-# Model = 'WaveMix'
-# hook_layer = 'conv'
-# image_size = '(32, 32, 3)'
-# random.seed(2023)
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--dataset', default='./dataset/' + NoiseType + '/' + DataSet, help='input dataset')
-# parser.add_argument('--model', default='./dataset/' + NoiseType + '/' + DataSet + '/' + Model + '.pth',
-#                     help='input model path')
-# parser.add_argument('--model_name', default=Model, help='input model path')
-# parser.add_argument('--class_path', default='./dataset/' + DataSet.lower() + '_classes.json',
-#                     help='input model path')
-# parser.add_argument('--image_size', default=image_size, help='input image size')
-# parser.add_argument('--model_args', default='./dataset/' + DataSet.lower() + '_model_args.pth',
-#                     help='input model args path')
-# parser.add_argument('--image_set', default='train', help='input image set')
-# parser.add_argument('--hook_layer', default=hook_layer, help='input hook layer')
-# parser.add_argument('--rm_ratio', default=0.05, help='input ratio')
-# parser.add_argument('--retrain_epoch', default=10, help='input retrain epoch')
-# parser.add_argument('--retrain_bs', default=64, help='input retrain batch size')
-# parser.add_argument('--slice_num', default=1, help='input slice num')
-# parser.add_argument('--ablation', default='None', help='input slice num')
+DataSet = 'EMNIST'
+NoiseType = 'CaseStudyData'
+Model = 'WaveMix'
+hook_layer = 'conv'
+image_size = '(32, 32, 3)'
+random.seed(2023)
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset', default='./dataset/' + NoiseType + '/' + DataSet, help='input dataset')
+parser.add_argument('--model', default='./dataset/' + NoiseType + '/' + DataSet + '/' + Model + '.pth',
+                    help='input model path')
+parser.add_argument('--model_name', default=Model, help='input model path')
+parser.add_argument('--class_path', default='./dataset/' + DataSet.lower() + '_classes.json',
+                    help='input model path')
+parser.add_argument('--image_size', default=image_size, help='input image size')
+parser.add_argument('--model_args', default='./dataset/' + DataSet.lower() + '_model_args.pth',
+                    help='input model args path')
+parser.add_argument('--image_set', default='train', help='input image set')
+parser.add_argument('--hook_layer', default=hook_layer, help='input hook layer')
+parser.add_argument('--rm_ratio', default=0.05, help='input ratio')
+parser.add_argument('--retrain_epoch', default=10, help='input retrain epoch')
+parser.add_argument('--retrain_bs', default=64, help='input retrain batch size')
+parser.add_argument('--slice_num', default=1, help='input slice num')
+parser.add_argument('--ablation', default='None', help='input slice num')
 
-# args = parser.parse_args()
-# args.slice_num = int(args.slice_num)
-# args.rm_ratio = float(args.rm_ratio)
-# args.retrain_epoch = int(args.retrain_epoch)
-# args.retrain_bs = int(args.retrain_bs)
-# if DataSet!='MTFL':
-#     data_s = data_slice(args, args.dataset + '/' + args.image_set, args.slice_num)
-# else:
-#     data_s = [None]
+args = parser.parse_args()
+args.slice_num = int(args.slice_num)
+args.rm_ratio = float(args.rm_ratio)
+args.retrain_epoch = int(args.retrain_epoch)
+args.retrain_bs = int(args.retrain_bs)
+if DataSet!='MTFL':
+    data_s = data_slice(args, args.dataset + '/' + args.image_set, args.slice_num)
+else:
+    data_s = [None]
 
-# results = []
-# df = DfauLo(args)
+results = []
+df = DfauLo(args)
 
-# noManual_results_list, Manual_results_list, noManual_sorted_score_list, Manual_sorted_score_list, dfaulo_time = df.run(
-#     data_s[0])
+noManual_results_list, Manual_results_list, noManual_sorted_score_list, Manual_sorted_score_list, dfaulo_time = df.run(
+    data_s[0])

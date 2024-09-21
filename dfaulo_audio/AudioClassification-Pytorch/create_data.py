@@ -1,4 +1,33 @@
 import os
+import random
+
+
+# def get_randomlabelnoise_data_list(audio_path, list_path):
+#     sound_sum = 0
+#     audios = os.listdir(audio_path)
+#     os.makedirs(list_path, exist_ok=True)
+#     f_train = open(os.path.join(list_path, 'MAD_rln_train_list.txt'), 'w', encoding='utf-8')
+#     random.seed(1216)
+#     for i in range(len(audios)):
+#         sounds = os.listdir(os.path.join(audio_path, audios[i]))
+#         num_sounds = len(sounds)
+#         labelnoise_idx = [i for i in range(num_sounds)]
+#         # choose 5% of the data to add noise
+#         labelnoise_idx = random.sample(labelnoise_idx, int(num_sounds * 0.05))
+#         for idx, sound in enumerate(sounds):
+#             label = eval(audios[i])
+#             sound_path = os.path.join(audio_path, audios[i], sound).replace('\\', '/')
+#             if idx in labelnoise_idx:
+#                 while True:
+#                     new_label = random.randint(0, 6)
+#                     if new_label != label:
+#                         break
+#                 f_train.write(f'{sound_path}\t{new_label}\n')
+#             else:
+#                 f_train.write(f'{sound_path}\t{eval(audios[i])}\n')
+#             sound_sum += 1
+#         print(f"Audio：{i + 1}/{len(audios)}")
+#     f_train.close()
 
 
 # 生成数据列表
@@ -6,24 +35,25 @@ def get_data_list(audio_path, list_path):
     sound_sum = 0
     audios = os.listdir(audio_path)
     os.makedirs(list_path, exist_ok=True)
-    f_train = open(os.path.join(list_path, 'train_list.txt'), 'w', encoding='utf-8')
-    f_test = open(os.path.join(list_path, 'test_list.txt'), 'w', encoding='utf-8')
-    f_label = open(os.path.join(list_path, 'label_list.txt'), 'w', encoding='utf-8')
+    # f_train = open(os.path.join(list_path, 'MAD_train_list.txt'), 'w', encoding='utf-8')
+    f_test = open(os.path.join(list_path, 'MAD_test_list.txt'), 'w', encoding='utf-8')
+    f_label = open(os.path.join(list_path, 'MAD_label_list.txt'), 'w', encoding='utf-8')
 
     for i in range(len(audios)):
         f_label.write(f'{audios[i]}\n')
         sounds = os.listdir(os.path.join(audio_path, audios[i]))
         for sound in sounds:
             sound_path = os.path.join(audio_path, audios[i], sound).replace('\\', '/')
-            if sound_sum % 10 == 0:
-                f_test.write(f'{sound_path}\t{i}\n')
-            else:
-                f_train.write(f'{sound_path}\t{i}\n')
+            # if sound_sum % 10 == 0:
+            #     f_test.write(f'{sound_path}\t{i}\n')
+            # else:
+            # f_train.write(f'{sound_path}\t{eval(audios[i])}\n')
+            f_test.write(f'{sound_path}\t{eval(audios[i])}\n')
             sound_sum += 1
         print(f"Audio：{i + 1}/{len(audios)}")
     f_label.close()
     f_test.close()
-    f_train.close()
+    # f_train.close()
 
 
 # 下载数据方式，执行：./tools/download_3dspeaker_data.sh
@@ -89,11 +119,12 @@ def create_UrbanSound8K_list(audio_path, metadata_path, list_path):
 
 
 if __name__ == '__main__':
-    # get_data_list('dataset/audio', 'dataset')
+    get_data_list('dataset/MADdataset/test01/', 'dataset')
+    # get_randomlabelnoise_data_list('dataset/MADdataset/training01/', 'dataset')
     # 生成生成方言数据列表
     # get_language_identification_data_list(audio_path='dataset/language',
     #                                       list_path='dataset/')
     # 创建UrbanSound8K数据列表
-    create_UrbanSound8K_list(audio_path='dataset/UrbanSound8K/audio',
-                             metadata_path='dataset/UrbanSound8K/metadata/UrbanSound8K.csv',
-                             list_path='dataset')
+    # create_UrbanSound8K_list(audio_path='dataset/UrbanSound8K/audio',
+    #                          metadata_path='dataset/UrbanSound8K/metadata/UrbanSound8K.csv',
+    #                          list_path='dataset')

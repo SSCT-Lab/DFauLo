@@ -441,7 +441,7 @@ class WaveMix(nn.Module):
     def __init__(
             self,
             *,
-            num_classes=26,
+            num_classes=45,
             depth=4,
             mult=2,
             ff_channel=48,
